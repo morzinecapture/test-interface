@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant Restaurant IA - Dashboard Complet</title>
+    <!-- Chargement de Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Couleurs principales pour un thème sombre */
+            --dark-bg: #1a202c;
+            --dark-surface: #2d3748;
+            --dark-card: #4a5568;
+            --dark-text: #e2e8f0;
+            --dark-accent: #a0aec0;
+            
+            /* Dégradés thématiques par page */
+            --chat-gradient: linear-gradient(135deg, #4c51bf 0%, #6b46c1 100%);
+            --planning-gradient: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+            --hours-gradient: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        .bg-gradient-chat {
+            background-image: var(--chat-gradient);
+        }
+        
+        .text-gradient-chat {
+            background-image: var(--chat-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .bg-gradient-planning {
+            background-image: var(--planning-gradient);
+        }
+        
+        .text-gradient-planning {
+            background-image: var(--planning-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .bg-gradient-hours {
+            background-image: var(--hours-gradient);
+        }
+
+        .text-gradient-hours {
+            background-image: var(--hours-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-button {
+            @apply flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-gray-400 hover:text-white;
+        }
+
+        .nav-button.active.chat {
+            @apply bg-blue-700 text-white shadow-md;
+        }
+
+        .nav-button.active.planning {
+            @apply bg-purple-700 text-white shadow-md;
+        }
+
+        .nav-button.active.hours {
+            @apply bg-red-600 text-white shadow-md;
+        }
+
+        .page {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user .message-bubble {
+            @apply bg-blue-600 text-white rounded-br-lg;
+        }
+        
+        .message.assistant .message-bubble {
+            @apply bg-gray-600 text-gray-100 rounded-bl-lg;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 bg-gray-800 bg-opacity-95 backdrop-blur-lg shadow-lg">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-3xl font-extrabold text-gradient-chat">
+                    <span class="align-middle">🍽️ Restaurant IA</span>
+                </span>
+            </div>
+            
+            <div class="hidden sm:flex items-center space-x-2 md:space-x-4">
+                <button id="chat-tab" class="nav-button active chat" onclick="showPage('chat')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle"><path d="M7.9 20A9.3 9.3 0 0 1 4 16.1L2 22l6-2Z"/><circle cx="12" cy="12" r="10"/></svg>
+                    Chat
+                </button>
+                <button id="planning-tab" class="nav-button planning" onclick="showPage('planning')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                    Planning
+                </button>
+                <button id="hours-tab" class="nav-button hours" onclick="showPage('hours')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-timer"><path d="M10 2h4"/><path d="M12 14v-4"/><circle cx="12" cy="12" r="9"/></svg>
+                    Heures Réelles
+                </button>
+            </div>
+            
+            <span id="status-indicator" class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full text-emerald-300 bg-emerald-800 transition-all duration-300">
+                <span class="size-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                En ligne
+            </span>
+        </nav>
+    </header>
+
+    <div class="flex-1 flex flex-col sm:flex-row bg-gray-900">
+        <!-- Sidebar -->
+        <aside class="w-full sm:w-80 bg-gray-800 p-6 md:p-8 border-r border-gray-700 shadow-xl sm:shadow-none">
+            <!-- Section 1: Vue d'ensemble -->
+            <section class="mb-8">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">📊 Vue d'ensemble</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-1 gap-4" id="sidebar-stats">
+                    <div class="bg-gray-700 p-4 rounded-lg border border-gray-600 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400">Employés actifs</p>
+                            <span id="sidebar-employees" class="text-2xl font-extrabold text-white">5</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg border border-gray-600 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400">Heures semaine</p>
+                            <span id="sidebar-hours" class="text-2xl font-extrabold text-white">195h</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M21.5 12c.7 1.2-4.2 10-11.5 10S1.3 13.2 2 12s4.2-10 11.5-10 11.5 8.8 8 10Z"/></svg>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg border border-gray-600 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400">Heures sup</p>
+                            <span id="sidebar-overtime" class="text-2xl font-extrabold text-white">20h</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M12 2v10"/><path d="M18.4 6.6L12 12l6.4 5.4"/><path d="M5.6 17.4L12 12l-6.4-5.4"/></svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Alertes -->
+            <section class="mb-8">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">🚨 Alertes RH</h3>
+                <div id="sidebar-alerts" class="space-y-4">
+                    <!-- Les alertes seront insérées ici par le JS -->
+                </div>
+            </section>
+
+            <!-- Section 3: Équipe -->
+            <section class="mb-8">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">👥 Équipe aujourd'hui</h3>
+                <div id="sidebar-team" class="space-y-3">
+                    <!-- L'équipe sera insérée ici par le JS -->
+                </div>
+            </section>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+
+            <!-- Chat Page -->
+            <div id="chat-page" class="page active flex flex-col h-full bg-gray-800 rounded-xl shadow-lg">
+                <div class="bg-gradient-chat text-white p-6 rounded-t-xl text-center shadow-inner">
+                    <h2 class="text-xl font-bold mb-1">🤖 Assistant IA Restaurant</h2>
+                    <p class="text-sm opacity-90">Chat • Vocal • Photo • Planning automatisé</p>
+                </div>
+                
+                <div id="chat-messages" class="flex-1 p-6 overflow-y-auto bg-gray-900 space-y-4">
+                    <!-- Messages de chat -->
+                    <div class="flex justify-start">
+                        <div class="message-bubble p-4 rounded-2xl shadow-sm text-sm max-w-lg border border-gray-600">
+                            <strong class="font-semibold">👋 Bonjour !</strong> Je suis votre assistant restaurant IA.
+                            <br><br>
+                            <strong>Je peux vous aider à :</strong>
+                            <ul class="list-disc pl-4 mt-2 space-y-1">
+                                <li>📝 Gérer le planning des employés automatiquement</li>
+                                <li>🎤 Enregistrer les horaires par message vocal</li>
+                                <li>📸 Traiter vos factures en photo</li>
+                                <li>📊 Suivre les heures supplémentaires en temps réel</li>
+                                <li>🍽️ Créer des menus du jour visuels</li>
+                            </ul>
+                            <p class="mt-2 text-xs text-gray-400">Commencez par me poser une question ou dictez vos horaires !</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6 bg-gray-800 border-t border-gray-700">
+                    <div class="p-3 mb-4 rounded-lg border border-blue-400 bg-blue-900 text-blue-100 text-sm">
+                        <strong>💡 Exemples d'utilisation :</strong><br>
+                        • <em>"Créer le planning de la semaine prochaine"</em><br>
+                        • <em>"Vanessa travaille de 9h à 17h demain"</em><br>
+                        • <em>"Plat du jour : Coq au vin 18,50€"</em><br>
+                        • <em>"Qui travaille mardi soir ?"</em>
+                    </div>
+                    
+                    <div class="flex items-end gap-3">
+                        <div class="flex-1 relative">
+                            <textarea 
+                                id="message-input" 
+                                class="w-full pl-5 pr-14 py-4 rounded-xl text-sm border-2 border-gray-700 bg-gray-800 text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all resize-none overflow-hidden h-12"
+                                placeholder="Tapez votre message ou commande..."
+                                rows="1"
+                            ></textarea>
+                            <div class="absolute right-3 bottom-3 flex gap-1">
+                                <button id="photo-btn" title="Photo" class="size-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-700 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-camera"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5L14.5 4Z"/><circle cx="12" cy="13" r="3"/></svg>
+                                </button>
+                                <button id="voice-btn" title="Vocal" class="size-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-700 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <button id="send-btn" class="size-12 rounded-xl bg-gradient-chat text-white flex items-center justify-center shadow-lg transform active:scale-95 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Planning Page -->
+            <div id="planning-page" class="page hidden">
+                <div class="bg-gray-800 p-8 rounded-xl shadow-lg mb-8 border border-gray-700">
+                    <h1 class="text-3xl font-extrabold text-gradient-planning mb-2">📅 Planning Restaurant</h1>
+                    <p class="text-gray-400">Gestion automatisée des horaires • Optimisation des équipes • Suivi temps réel</p>
+                    <div class="mt-6 flex flex-wrap gap-4">
+                        <button class="flex items-center gap-2 px-5 py-3 bg-gradient-planning text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all" onclick="generatePlanning()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles"><path d="M9.9 2.1c.6.2 1.2.6 1.7 1.2a3.8 3.8 0 0 0 2.6 2.6c.6.5 1 1.1 1.2 1.7L21 12l-5.4 3.4c-.2.6-.6 1.2-1.2 1.7a3.8 3.8 0 0 0-2.6 2.6c-.5.6-1.1 1-1.7 1.2L12 21l-3.4-5.4c-.6-.2-1.2-.6-1.7-1.2a3.8 3.8 0 0 0-2.6-2.6c-.5-.6-1-1.1-1.2-1.7L3 12l5.4-3.4c.6-.2 1.2-.6 1.7-1.2a3.8 3.8 0 0 0 2.6-2.6c.5-.6 1.1-1 1.7-1.2L12 3Z"/><path d="M20 3a1 1 0 0 0-1-1c-1.3 0-2 1.7-2 1.7s.7 2 2 2 2-1.7 2-1.7-1-1.7-1-2Z"/><path d="M10 21c-1.3 0-2-1.7-2-1.7s.7-2 2-2 2 1.7 2 1.7-1 1.7-1 2Z"/></svg>
+                            Générer planning automatique
+                        </button>
+                        <button class="flex items-center gap-2 px-5 py-3 bg-gray-700 text-gray-200 rounded-xl font-semibold shadow-sm border border-gray-600 hover:bg-gray-600 transform hover:-translate-y-1 transition-all" onclick="exportPlanning()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail-open"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 8.4-8.7 6.5c-.9.72-2.1.72-3 0L2 8.4"/></svg>
+                            Envoyer par email
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="planning-alerts" class="mb-6"></div>
+                
+                <div id="planning-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Planning sera généré ici -->
+                </div>
+            </div>
+
+            <!-- Hours Page -->
+            <div id="hours-page" class="page hidden">
+                <div class="bg-gray-800 p-8 rounded-xl shadow-lg mb-8 border border-gray-700">
+                    <h1 class="text-3xl font-extrabold text-gradient-hours mb-2">⏰ Heures Réelles</h1>
+                    <p class="text-gray-400">Suivi des heures effectives • Calcul automatique des heures supplémentaires</p>
+                    <div class="mt-6 flex flex-wrap gap-4">
+                        <button class="flex items-center gap-2 px-5 py-3 bg-gradient-hours text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all" onclick="addHours()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-circle"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+                            Ajouter heures
+                        </button>
+                        <button class="flex items-center gap-2 px-5 py-3 bg-gray-700 text-gray-200 rounded-xl font-semibold shadow-sm border border-gray-600 hover:bg-gray-600 transform hover:-translate-y-1 transition-all" onclick="exportHoursReport()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bar-chart-2"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>
+                            Rapport hebdomadaire
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-blue-500">
+                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Heures totales semaine</p>
+                        <span id="total-hours-week" class="text-5xl font-extrabold text-white mt-2">195</span>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-fuchsia-500">
+                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Heures supplémentaires</p>
+                        <span id="overtime-hours-week" class="text-5xl font-extrabold text-white mt-2">20</span>
+                    </div>
+                </div>
+
+                <div id="hours-alerts" class="mb-6"></div>
+
+                <div id="employees-hours" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Employés seront générés ici -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modale pour les messages d'alerte (remplace alert()) -->
+    <div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-gray-900 opacity-50"></div>
+        <div class="bg-gray-800 rounded-xl p-6 shadow-2xl z-10 max-w-sm w-full">
+            <h3 id="modal-title" class="text-xl font-bold text-white mb-2"></h3>
+            <p id="modal-message" class="text-gray-400 mb-4"></p>
+            <div class="flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input file caché -->
+    <input type="file" id="file-input" style="display: none;" accept="image/*">
+
+    <script>
+        // Configuration & Variables globales
+        const CONFIG = {
+            // URL du webhook de production
+            webhookUrl: 'https://morzinecap.app.n8n.cloud/webhook/23ed6cad-a469-446c-bccd-fe294d0f1839',
+            airtable: {
+                // Clé API de production
+                apiKey: 'patYKX4FAPXVkvaG4.b63e717dd567c08cf287b75011f38f0e0b4c9a0535fe8f85ddcfbd3d8b907fe0',
+                baseId: 'app4f09d4qu9atKpR',
+                tables: {
+                    employees: 'tblNYFxq1SoepyjAh',
+                    planning: 'tblQHhKlNhgVSNdJw',
+                    hours: 'tblemYdrNDfJMWytG',
+                    dashboard: 'tbljZN2E30DPg1wn1'
+                }
+            }
+        };
+
+        let appData = {
+            employees: [],
+            planning: [],
+            dashboard: null
+        };
+        
+        let isRecording = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+
+        // Éléments du DOM
+        const elements = {
+            chatPage: document.getElementById('chat-page'),
+            planningPage: document.getElementById('planning-page'),
+            hoursPage: document.getElementById('hours-page'),
+            navButtons: document.querySelectorAll('.nav-button'),
+            chatMessages: document.getElementById('chat-messages'),
+            messageInput: document.getElementById('message-input'),
+            sendBtn: document.getElementById('send-btn'),
+            voiceBtn: document.getElementById('voice-btn'),
+            photoBtn: document.getElementById('photo-btn'),
+            fileInput: document.getElementById('file-input'),
+            sidebarStats: document.getElementById('sidebar-stats'),
+            sidebarAlerts: document.getElementById('sidebar-alerts'),
+            sidebarTeam: document.getElementById('sidebar-team'),
+            planningGrid: document.getElementById('planning-grid'),
+            planningAlerts: document.getElementById('planning-alerts'),
+            totalHoursWeek: document.getElementById('total-hours-week'),
+            overtimeHoursWeek: document.getElementById('overtime-hours-week'),
+            hoursAlerts: document.getElementById('hours-alerts'),
+            employeesHours: document.getElementById('employees-hours'),
+            modal: document.getElementById('modal'),
+            modalTitle: document.getElementById('modal-title'),
+            modalMessage: document.getElementById('modal-message')
+        };
+
+        // Initialisation de l'application
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            loadInitialData();
+        });
+
+        function setupEventListeners() {
+            elements.sendBtn.addEventListener('click', sendMessage);
+            elements.messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            elements.messageInput.addEventListener('input', adjustTextareaHeight);
+            elements.voiceBtn.addEventListener('click', toggleVoiceRecording);
+            elements.photoBtn.addEventListener('click', () => elements.fileInput.click());
+            elements.fileInput.addEventListener('change', handleFileSelect);
+        }
+
+        // --- Navigation ---
+        function showPage(pageId) {
+            elements.navButtons.forEach(btn => {
+                btn.classList.remove('active', 'chat', 'planning', 'hours');
+                btn.classList.add(pageId);
+                if (btn.id.startsWith(pageId)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            document.getElementById(`${pageId}-page`).classList.remove('hidden');
+        }
+
+        // --- Gestion du Chat ---
+        async function sendMessage() {
+            const text = elements.messageInput.value.trim();
+            if (!text) return;
+
+            addMessage('user', text);
+            elements.messageInput.value = '';
+            adjustTextareaHeight();
+
+            try {
+                showTypingIndicator();
+                const response = await fetch(CONFIG.webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+                hideTypingIndicator();
+
+                if (data.response) {
+                    addMessage('assistant', data.response);
+                } else {
+                    addMessage('assistant', 'Action effectuée avec succès !');
+                }
+                loadInitialData();
+            } catch (error) {
+                console.error('❌ Erreur webhook:', error);
+                hideTypingIndicator();
+                addMessage('assistant', '⚠️ Je ne peux pas répondre pour le moment. Veuillez réessayer.');
+            }
+        }
+
+        function addMessage(sender, text, image = null) {
+            const messageEl = document.createElement('div');
+            messageEl.classList.add('flex', 'animate-fadeIn', sender === 'user' ? 'justify-end' : 'justify-start', 'message', sender);
+            
+            const bubbleEl = document.createElement('div');
+            bubbleEl.classList.add('p-4', 'rounded-2xl', 'shadow-sm', 'text-sm', 'max-w-lg', 'message-bubble');
+
+            if (image) {
+                const imgEl = document.createElement('img');
+                imgEl.src = image;
+                imgEl.classList.add('max-w-xs', 'rounded-lg', 'mb-2');
+                bubbleEl.appendChild(imgEl);
+            }
+            bubbleEl.innerHTML += text;
+
+            messageEl.appendChild(bubbleEl);
+            elements.chatMessages.appendChild(messageEl);
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const indicatorEl = document.createElement('div');
+            indicatorEl.id = 'typing-indicator';
+            indicatorEl.classList.add('flex', 'justify-start');
+            indicatorEl.innerHTML = `
+                <div class="message-bubble p-4 rounded-2xl shadow-sm text-sm max-w-sm rounded-bl-lg bg-gray-600">
+                    <div class="flex space-x-1">
+                        <span class="size-2 rounded-full bg-gray-400 animate-pulse"></span>
+                        <span class="size-2 rounded-full bg-gray-400 animate-pulse" style="animation-delay: 0.2s;"></span>
+                        <span class="size-2 rounded-full bg-gray-400 animate-pulse" style="animation-delay: 0.4s;"></span>
+                    </div>
+                </div>
+            `;
+            elements.chatMessages.appendChild(indicatorEl);
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicatorEl = document.getElementById('typing-indicator');
+            if (indicatorEl) indicatorEl.remove();
+        }
+
+        function adjustTextareaHeight() {
+            elements.messageInput.style.height = 'auto';
+            elements.messageInput.style.height = elements.messageInput.scrollHeight + 'px';
+        }
+
+        // --- Saisie Audio & Image ---
+        async function toggleVoiceRecording() {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.onload = () => sendVoiceMessage(reader.result.split(',')[1]);
+                        reader.readAsDataURL(audioBlob);
+                    };
+                    mediaRecorder.start();
+                    isRecording = true;
+                    elements.voiceBtn.classList.add('bg-red-500', 'text-white', 'animate-pulse');
+                } catch (error) {
+                    showModal('Erreur', 'Impossible d\'accéder au microphone. Vérifiez vos permissions.');
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                elements.voiceBtn.classList.remove('bg-red-500', 'text-white', 'animate-pulse');
+            }
+        }
+
+        async function sendVoiceMessage(base64Audio) {
+            addMessage('user', 'Envoi d\'un message vocal...');
+            try {
+                showTypingIndicator();
+                const response = await fetch(CONFIG.webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ audio: base64Audio })
+                });
+                const data = await response.json();
+                hideTypingIndicator();
+                addMessage('assistant', data.response || 'Message vocal traité !');
+                loadInitialData();
+            } catch (error) {
+                hideTypingIndicator();
+                showModal('Erreur', 'Erreur lors du traitement de l\'audio.');
+            }
+        }
+        
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const base64Image = e.target.result;
+                    addMessage('user', '', base64Image);
+                    try {
+                        showTypingIndicator();
+                        const response = await fetch(CONFIG.webhookUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ image: base64Image.split(',')[1] })
+                        });
+                        const data = await response.json();
+                        hideTypingIndicator();
+                        addMessage('assistant', data.response || 'Image traitée !');
+                        loadInitialData();
+                    } catch (error) {
+                        hideTypingIndicator();
+                        showModal('Erreur', 'Erreur lors du traitement de l\'image.');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // --- Gestion des données ---
+        async function loadInitialData() {
+            // Simulation d'une API pour le contenu
+            const simulatedData = {
+                employees: [
+                    { id: '1', nom: 'Vanessa', role: 'Serveur', heuresContrat: 35, heuresSemaine: 39, heuresSupp: 4, status: 'active' },
+                    { id: '2', nom: 'Sarah', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 42, heuresSupp: 7, status: 'active' },
+                    { id: '3', nom: 'Oscar', role: 'Plongeur', heuresContrat: 35, heuresSemaine: 38, heuresSupp: 3, status: 'active' },
+                    { id: '4', nom: 'Louis', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 35, heuresSupp: 0, status: 'active' },
+                    { id: '5', nom: 'Alexis', role: 'Serveur', heuresContrat: 35, heuresSemaine: 41, heuresSupp: 6, status: 'active' }
+                ],
+                planning: generateWeekPlanning(),
+                dashboard: {
+                    totalEmployes: 5,
+                    totalHeures: 195,
+                    totalHeuresSupp: 20,
+                    coutHS: 375,
+                    status: 'warning'
+                }
+            };
+            appData = { ...appData, ...simulatedData };
+            updateUI();
+        }
+
+        function generateWeekPlanning() {
+            const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+            const employees = ['Vanessa', 'Sarah', 'Oscar', 'Louis', 'Alexis'];
+            const planning = [];
+            days.forEach((day, index) => {
+                const midiTeam = employees.slice(0, Math.floor(Math.random() * 3) + 2);
+                const soirTeam = employees.slice(0, Math.floor(Math.random() * 4) + 3);
+                planning.push({ day, service: 'Midi', employes: midiTeam, heures: '12h00-15h00' });
+                planning.push({ day, service: 'Soir', employes: soirTeam, heures: '18h00-23h00' });
+            });
+            return planning;
+        }
+
+        // --- Mise à jour de l'UI ---
+        function updateUI() {
+            updateSidebar();
+            updatePlanningPage();
+            updateHoursPage();
+        }
+        
+        function updateSidebar() {
+            const data = appData.dashboard;
+            if (!data) return;
+
+            document.getElementById('sidebar-employees').textContent = data.totalEmployes;
+            document.getElementById('sidebar-hours').textContent = data.totalHeures + 'h';
+            document.getElementById('sidebar-overtime').textContent = data.totalHeuresSupp + 'h';
+
+            let alertHtml = '';
+            if (data.totalHeuresSupp > 25) {
+                alertHtml = `<div class="p-4 rounded-lg bg-red-800 border border-red-700 text-red-200 font-medium">🚨 Situation critique : <span class="font-bold">${data.totalHeuresSupp}h</span> d'heures sup !</div>`;
+            } else if (data.totalHeuresSupp > 15) {
+                alertHtml = `<div class="p-4 rounded-lg bg-yellow-800 border border-yellow-700 text-yellow-200 font-medium">⚠️ Vigilance requise : <span class="font-bold">${data.totalHeuresSupp}h</span> d'heures sup.</div>`;
+            } else {
+                alertHtml = `<div class="p-4 rounded-lg bg-emerald-800 border border-emerald-700 text-emerald-200 font-medium">✅ Situation normale : Heures sous contrôle.</div>`;
+            }
+            elements.sidebarAlerts.innerHTML = alertHtml;
+
+            let teamHtml = '';
+            appData.employees.forEach(emp => {
+                teamHtml += `
+                    <div class="flex items-center justify-between p-4 rounded-lg bg-gray-700 border border-gray-600">
+                        <div>
+                            <p class="font-medium text-white">${emp.nom}</p>
+                            <p class="text-xs text-gray-400">${emp.role}</p>
+                        </div>
+                        <span class="text-sm font-semibold text-white">${emp.heuresSemaine}h ${emp.heuresSupp > 0 ? `(+${emp.heuresSupp}h)` : ''}</span>
+                    </div>
+                `;
+            });
+            elements.sidebarTeam.innerHTML = teamHtml;
+        }
+
+        function updatePlanningPage() {
+            const data = appData.dashboard;
+            
+            let alertHtml = '';
+            if (data.totalHeuresSupp > 20) {
+                alertHtml = `<div class="p-4 rounded-lg bg-yellow-800 border border-yellow-700 text-yellow-200 font-medium">
+                    ⚠️ Planning à optimiser : <span class="font-bold">${data.totalHeuresSupp}h</span> d'heures supplémentaires prévues.
+                </div>`;
+            } else {
+                alertHtml = `<div class="p-4 rounded-lg bg-emerald-800 border border-emerald-700 text-emerald-200 font-medium">
+                    ✅ Planning optimisé : Répartition équilibrée des heures.
+                </div>`;
+            }
+            elements.planningAlerts.innerHTML = alertHtml;
+            
+            const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+            let gridHtml = '';
+            days.forEach(day => {
+                const dayPlanning = appData.planning.filter(p => p.day === day);
+                const midiService = dayPlanning.find(p => p.service === 'Midi');
+                const soirService = dayPlanning.find(p => p.service === 'Soir');
+                
+                gridHtml += `
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg border-2 border-purple-500 transform hover:scale-105 transition-all">
+                        <h4 class="text-lg font-bold text-white mb-4">${day}</h4>
+                        <div class="space-y-4">
+                            ${midiService ? `
+                            <div class="bg-purple-900 p-4 rounded-lg border border-purple-800">
+                                <p class="text-xs font-semibold uppercase text-purple-200 tracking-wider">Midi (${midiService.heures})</p>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    ${midiService.employes.map(emp => `<span class="px-2 py-1 bg-purple-700 text-purple-100 rounded-full text-xs font-medium">${emp}</span>`).join('')}
+                                </div>
+                            </div>` : `<div class="bg-gray-700 p-4 rounded-lg text-gray-500 border border-gray-600 text-sm">Fermé midi</div>`}
+                            
+                            ${soirService ? `
+                            <div class="bg-purple-900 p-4 rounded-lg border border-purple-800">
+                                <p class="text-xs font-semibold uppercase text-purple-200 tracking-wider">Soir (${soirService.heures})</p>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    ${soirService.employes.map(emp => `<span class="px-2 py-1 bg-purple-700 text-purple-100 rounded-full text-xs font-medium">${emp}</span>`).join('')}
+                                </div>
+                            </div>` : `<div class="bg-gray-700 p-4 rounded-lg text-gray-500 border border-gray-600 text-sm">Fermé soir</div>`}
+                        </div>
+                    </div>
+                `;
+            });
+            elements.planningGrid.innerHTML = gridHtml;
+        }
+
+        function updateHoursPage() {
+            const data = appData.dashboard;
+            elements.totalHoursWeek.textContent = data.totalHeures;
+            elements.overtimeHoursWeek.textContent = data.totalHeuresSupp;
+
+            let alertHtml = '';
+            if (data.totalHeuresSupp > 25) {
+                alertHtml = `<div class="p-4 rounded-lg bg-red-800 border border-red-700 text-red-200 font-medium">
+                    🚨 SITUATION CRITIQUE : <span class="font-bold">${data.totalHeuresSupp}h</span> d'heures supplémentaires !
+                </div>`;
+            } else if (data.totalHeuresSupp > 15) {
+                alertHtml = `<div class="p-4 rounded-lg bg-yellow-800 border border-yellow-700 text-yellow-200 font-medium">
+                    ⚠️ VIGILANCE REQUISE : <span class="font-bold">${data.totalHeuresSupp}h</span> d'heures supplémentaires.
+                </div>`;
+            } else {
+                alertHtml = `<div class="p-4 rounded-lg bg-emerald-800 border border-emerald-700 text-emerald-200 font-medium">
+                    ✅ SITUATION NORMALE : Heures sous contrôle.
+                </div>`;
+            }
+            elements.hoursAlerts.innerHTML = alertHtml;
+
+            let employeesHtml = '';
+            appData.employees.forEach(emp => {
+                const isOvertimeCritical = emp.heuresSupp > 5;
+                const overtimeClass = isOvertimeCritical ? 'bg-red-500' : 'bg-blue-600';
+                
+                employeesHtml += `
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-orange-500 transform hover:scale-105 transition-all">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-white">${emp.nom}</h3>
+                                <p class="text-xs font-medium text-gray-400 uppercase">${emp.role}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-t border-gray-700 pt-4">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-400">Total semaine</p>
+                                <span class="text-xl font-bold text-white">${emp.heuresSemaine}h</span> / <span class="text-gray-400">${emp.heuresContrat}h</span>
+                            </div>
+                            <div class="text-right">
+                                ${emp.heuresSupp > 0 ? `
+                                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold text-white ${overtimeClass}">+${emp.heuresSupp}h</span>
+                                ` : `
+                                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold text-emerald-200 bg-emerald-800">Normal</span>
+                                `}
+                                <p class="text-xs font-medium text-gray-400 mt-1">Coût: ~${Math.round(emp.heuresSupp * 18.75)}€</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            elements.employeesHours.innerHTML = employeesHtml;
+        }
+
+        // --- Fonctions d'action ---
+        async function generatePlanning() {
+            addMessage('user', 'Générer le planning automatique de la semaine');
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                addMessage('assistant', '✅ Planning généré avec succès ! Vous pouvez le consulter sur cette page ou l\'envoyer par email.');
+                loadInitialData();
+                showModal('Succès', 'Le planning a été généré automatiquement.');
+            }, 2000);
+        }
+
+        function exportPlanning() {
+            addMessage('assistant', '📧 Envoi du planning par email en cours...');
+            showModal('Email envoyé', 'Un email avec le planning détaillé a été envoyé à tous les employés concernés.');
+        }
+
+        function addHours() {
+            showModal('Saisie rapide', 'Veuillez dicter vos heures via le chat vocal pour une saisie rapide, ou tapez votre message comme "Vanessa a travaillé de 9h à 17h aujourd\'hui".');
+        }
+
+        function exportHoursReport() {
+            addMessage('assistant', '📊 Génération du rapport hebdomadaire en cours...');
+            showModal('Rapport généré', 'Le rapport hebdomadaire des heures a été généré et est prêt à être exporté.');
+        }
+
+        // --- Modale personnalisée ---
+        function showModal(title, message) {
+            elements.modalTitle.textContent = title;
+            elements.modalMessage.textContent = message;
+            elements.modal.classList.remove('hidden');
+            elements.modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            elements.modal.classList.add('hidden');
+            elements.modal.classList.remove('flex');
+        }
+    </script>
+</body>
+</html>

@@ -135,4 +135,221 @@
     function closeChatModal(){ elements.chatModal.classList.add('hidden'); elements.chatModal.classList.remove('flex'); }
 
     // --- COMMUNICATION AVEC N8N ---
-    async function fetchInitialDa
+    async function fetchInitialData(){
+      try{
+        const response = await fetch(N8N_WEBHOOK_URL,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ action:'getAllData' })
+        });
+        if(!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        return await response.json();
+      }catch(err){
+        console.warn("N8N Fetch Error: fallback local", err);
+        return getSimulatedData(); // Fallback
+      }
+    }
+
+    async function sendMessageToN8N(payload){
+      try{
+        const response = await fetch(N8N_WEBHOOK_URL,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(payload)
+        });
+        if(!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        return await response.json();
+      }catch(err){
+        console.error("N8N Send Error:", err);
+        return { response:"Désolé, une erreur de communication est survenue." };
+      }
+    }
+
+    // --- MISE À JOUR UI ---
+    function updateUI(data){
+      if(!data || !data.employees || !data.planning || !data.dashboard){
+        console.error("Data is invalid, cannot update UI.", data);
+        return;
+      }
+      const { employees, planning, dashboard } = data;
+
+      // Équipe du jour
+      elements.teamToday.innerHTML = employees
+        .filter(e=>e.present)
+        .map(emp=>`
+          <div class="flex items-center justify-between bg-slate-800 p-3 rounded-lg">
+            <p class="font-bold">${emp.nom}
+              <span class="text-sm font-normal text-text-secondary">(${emp.role})</span>
+            </p>
+            <div class="flex items-center gap-2 text-green-400">
+              <span class="size-2 bg-accent-green rounded-full"></span>
+              <span class="text-sm font-semibold">Présent</span>
+            </div>
+          </div>`).join('') || `<p class="text-text-secondary">Personne n'est indiqué comme présent.</p>`;
+
+      // Totaux semaine
+      elements.weeklyOverview.innerHTML = `
+        <div class="flex items-center justify-between text-lg">
+          <span class="text-text-secondary">Total heures prévues :</span>
+          <span class="font-bold">${dashboard.totalHeures}h</span>
+        </div>
+        <div class="flex items-center justify-between text-lg">
+          <span class="text-text-secondary">Total heures supp. :</span>
+          <span class="font-bold text-orange-400">${dashboard.totalHeuresSupp}h</span>
+        </div>`;
+
+      // Planning (par jour x Midi/Soir)
+      const days = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+      elements.planningGrid.innerHTML = days.map(day=>`
+        <div class="bg-slate-800 p-4 rounded-xl space-y-2">
+          <h4 class="font-bold text-center text-lg mb-1">${day}</h4>
+          <div class="bg-slate-900 p-3 rounded-md">
+            <p class="font-semibold text-purple-300">Midi</p>
+            <p class="text-sm text-text-secondary">
+              ${
+                planning.filter(p=>p.day===day && p.service==='Midi')
+                        .flatMap(p=>p.employes).join(', ') || '<em>Aucun</em>'
+              }
+            </p>
+          </div>
+          <div class="bg-slate-900 p-3 rounded-md">
+            <p class="font-semibold text-orange-300">Soir</p>
+            <p class="text-sm text-text-secondary">
+              ${
+                planning.filter(p=>p.day===day && p.service==='Soir')
+                        .flatMap(p=>p.employes).join(', ') || '<em>Aucun</em>'
+              }
+            </p>
+          </div>
+        </div>`).join('');
+
+      // Heures par employé
+      elements.employeesHoursGrid.innerHTML = employees.map(emp=>`
+        <div class="bg-slate-800 p-4 rounded-xl space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-bold">${emp.nom}</p>
+              <p class="text-text-secondary text-sm">${emp.role}</p>
+            </div>
+            <span class="px-2 py-1 rounded-md text-xs ${emp.heuresSupp>0?'bg-orange-500/20 text-orange-300':'bg-slate-700 text-text-secondary'}">
+              ${emp.heuresSupp||0}h HS
+            </span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center text-sm">
+            <div class="bg-slate-900 p-2 rounded-md">
+              <div class="font-bold">${emp.heuresContrat||0}h</div>
+              <div class="text-text-secondary">Contrat</div>
+            </div>
+            <div class="bg-slate-900 p-2 rounded-md">
+              <div class="font-bold">${emp.heuresSemaine||0}h</div>
+              <div class="text-text-secondary">Réalisé</div>
+            </div>
+            <div class="bg-slate-900 p-2 rounded-md">
+              <div class="font-bold">${emp.heuresSupp||0}h</div>
+              <div class="text-text-secondary">Suppl.</div>
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    // --- CHAT UI ---
+    function appendChatMessage(msg, who='ia'){
+      const isUser = who==='user';
+      const bubble = `
+        <div class="flex ${isUser?'justify-end':'justify-start'}">
+          <div class="p-3 rounded-lg ${isUser?'bg-accent-blue text-black':'bg-slate-800'} max-w-md whitespace-pre-wrap">${msg}</div>
+        </div>`;
+      elements.chatMessages.innerHTML += bubble;
+      elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+    }
+    function showTypingIndicator(){
+      const html = `<div id="typing-indicator" class="flex justify-start"><div class="p-3 rounded-lg bg-slate-800"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
+      elements.chatMessages.innerHTML += html;
+      elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+    }
+    function hideTypingIndicator(){
+      const indicator = document.getElementById('typing-indicator');
+      if(indicator) indicator.remove();
+    }
+
+    // --- DONNÉES SIMULÉES (FALLBACK) ---
+    function getSimulatedData(){
+      return {
+        employees:[
+          { id:'1', nom:'Vanessa', role:'Serveur', heuresContrat:35, heuresSemaine:39, heuresSupp:4, present:true },
+          { id:'2', nom:'Sarah', role:'Cuisine', heuresContrat:35, heuresSemaine:42, heuresSupp:7, present:true },
+          { id:'3', nom:'Oscar', role:'Plongeur', heuresContrat:35, heuresSemaine:38, heuresSupp:3, present:false },
+          { id:'4', nom:'Louis', role:'Cuisine', heuresContrat:35, heuresSemaine:35, heuresSupp:0, present:true },
+          { id:'5', nom:'Alexis', role:'Serveur', heuresContrat:35, heuresSemaine:41, heuresSupp:6, present:false }
+        ],
+        planning:[
+          { day:'Lundi', service:'Soir', employes:['Vanessa','Sarah','Oscar','Alexis'] },
+          { day:'Mardi', service:'Midi', employes:['Louis','Alexis'] },
+          { day:'Mardi', service:'Soir', employes:['Vanessa','Louis','Oscar','Sarah'] }
+        ],
+        dashboard:{ totalHeures:195, totalHeuresSupp:20 }
+      };
+    }
+
+    // --- LIVE REFRESH (simple & robuste) ---
+    const POLL_INTERVAL_MS = 8000; // ajuste si besoin
+    let __lastSnapshot = '';
+    let refreshTimerId = null;
+
+    async function refreshIfChanged(){
+      const data = await fetchInitialData();
+      const snapshot = JSON.stringify(data);
+      if(snapshot !== __lastSnapshot){
+        updateUI(data);
+        __lastSnapshot = snapshot;
+      }
+    }
+
+    function startAutoRefresh(){
+      stopAutoRefresh();
+      refreshTimerId = setInterval(refreshIfChanged, POLL_INTERVAL_MS);
+    }
+    function stopAutoRefresh(){
+      if(refreshTimerId){ clearInterval(refreshTimerId); refreshTimerId = null; }
+    }
+
+    // --- INITIALISATION ---
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      showPage('home');
+
+      // 1er rendu
+      await refreshIfChanged();
+
+      // Auto-refresh
+      startAutoRefresh();
+
+      // Pause / reprise selon visibilité
+      document.addEventListener('visibilitychange', ()=>{
+        if(document.hidden){ stopAutoRefresh(); }
+        else { refreshIfChanged(); startAutoRefresh(); }
+      });
+
+      // Chat: envoi + refresh immédiat
+      const handleSend = async ()=>{
+        const input = elements.chatInput;
+        const userMessage = input.value.trim();
+        if(!userMessage) return;
+
+        appendChatMessage(userMessage,'user');
+        input.value='';
+        showTypingIndicator();
+
+        const iaResponse = await sendMessageToN8N({ text:userMessage /* + autres payloads si besoin */ });
+        hideTypingIndicator();
+        appendChatMessage(iaResponse.response || "Action traitée avec succès.", 'ia');
+
+        // Refresh immédiat après action de l’agent
+        await refreshIfChanged();
+      };
+
+      elements.chatSend.addEventListener('click', handleSend);
+      elements.chatInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') handleSend(); });
+    });
+  </script>
+</body>
+</html>

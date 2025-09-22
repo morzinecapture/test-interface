@@ -44,6 +44,11 @@
         .page-title {
             @apply text-4xl font-bold text-white mb-8;
         }
+        /* Style pour l'indicateur de frappe */
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+        .typing-indicator span { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--text-secondary); animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
     </style>
 </head>
 <body>
@@ -108,7 +113,7 @@
         </div>
     </main>
 
-    <!-- MODIFICATION: Bouton flottant rehaussé sur mobile -->
+    <!-- Bouton flottant rehaussé sur mobile -->
     <button onclick="openChatModal()" class="fixed bottom-24 right-6 size-16 bg-accent-blue rounded-full shadow-lg flex items-center justify-center text-white z-50 transform hover:scale-110 transition-transform md:bottom-6">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
     </button>
@@ -129,7 +134,6 @@
             <div id="chat-messages" class="flex-1 overflow-y-auto p-2 space-y-4">
                 <div class="p-3 rounded-lg bg-slate-800 max-w-md">Bonjour ! Comment puis-je vous aider ?</div>
             </div>
-            <!-- MODIFICATION: Ajout des boutons photo et vocal dans le chat -->
             <div class="mt-4 flex items-center gap-3">
                 <div class="relative flex-1">
                     <input id="chat-input" type="text" class="w-full bg-slate-800 p-4 rounded-lg border-2 border-transparent focus:border-accent-blue focus:outline-none pr-24" placeholder="Envoyer un message...">
@@ -150,23 +154,32 @@
     </div>
 
     <script>
+        // --- CONFIGURATION ---
+        const N8N_WEBHOOK_URL = 'https://morzinecap.app.n8n.cloud/webhook/23ed6cad-a469-446c-bccd-fe294d0f1839';
+        
+        // --- ATTENTION : RISQUE DE SÉCURITÉ MAJEUR ---
+        // Le token Airtable ci-dessous ne doit JAMAIS être stocké dans le code de votre site web.
+        // N'importe quel visiteur peut le voir et obtenir un accès complet à votre base Airtable.
+        // Ce token doit être stocké de manière sécurisée dans les "Credentials" de votre workflow n8n.
+        // Je l'inclus ici uniquement parce que vous l'avez demandé explicitement pour des tests.
+        const AIRTABLE_TOKEN = 'patYKX4FAPXVkvaG4.b63e717dd567c08cf287b75011f38f0e0b4c9a0535fe8f85ddcfbd3d8b907fe0';
+
+
+        // --- ÉLÉMENTS DU DOM ---
         const elements = {
             pages: document.querySelectorAll('.page'),
             navButtons: document.querySelectorAll('.nav-button'),
-            // Page Accueil
             teamToday: document.getElementById('team-today'),
             weeklyOverview: document.getElementById('weekly-overview'),
-            // Page Planning
             planningGrid: document.getElementById('planning-grid'),
-            // Page Heures
             employeesHoursGrid: document.getElementById('employees-hours-grid'),
-            // Modale Chat
             chatModal: document.getElementById('chat-modal'),
             chatMessages: document.getElementById('chat-messages'),
             chatInput: document.getElementById('chat-input'),
             chatSend: document.getElementById('chat-send'),
         };
-
+        
+        // --- NAVIGATION ---
         function showPage(pageId) {
             elements.pages.forEach(p => p.classList.add('hidden'));
             document.getElementById(`${pageId}-page`).classList.remove('hidden');
@@ -176,113 +189,122 @@
             });
             window.scrollTo(0, 0);
         }
-
         function openChatModal() { elements.chatModal.classList.remove('hidden'); elements.chatModal.classList.add('flex'); }
         function closeChatModal() { elements.chatModal.classList.add('hidden'); elements.chatModal.classList.remove('flex'); }
+        
+        // --- COMMUNICATION AVEC LE BACKEND (N8N) ---
+        async function fetchInitialData() {
+            try {
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getAllData' })
+                });
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.warn("N8N Fetch Error: Could not load live data. Using fallback.", error);
+                return getSimulatedData(); // Fallback en cas d'erreur
+            }
+        }
+        
+        async function sendMessageToN8N(payload) {
+            try {
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error("N8N Send Error:", error);
+                return { response: "Désolé, une erreur de communication est survenue." };
+            }
+        }
 
+        // --- MISE À JOUR DE L'INTERFACE ---
         function updateUI(data) {
+            if (!data || !data.employees || !data.planning || !data.dashboard) {
+                console.error("Data is invalid, cannot update UI.", data);
+                return;
+            }
             const { employees, planning, dashboard } = data;
             
-            // --- ACCUEIL ---
             elements.teamToday.innerHTML = employees.filter(e => e.present).map(emp => `
                 <div class="flex items-center justify-between bg-slate-800 p-3 rounded-lg">
                     <p class="font-bold">${emp.nom} <span class="text-sm font-normal text-text-secondary">(${emp.role})</span></p>
-                    <div class="flex items-center gap-2 text-green-400">
-                        <span class="size-2 bg-accent-green rounded-full"></span>
-                        <span class="text-sm font-semibold">Présent</span>
-                    </div>
-                </div>
-            `).join('');
+                    <div class="flex items-center gap-2 text-green-400"><span class="size-2 bg-accent-green rounded-full"></span><span class="text-sm font-semibold">Présent</span></div>
+                </div>`).join('') || `<p class="text-text-secondary">Personne n'est indiqué comme présent.</p>`;
             
             elements.weeklyOverview.innerHTML = `
-                <div class="flex items-center justify-between text-lg">
-                    <span class="text-text-secondary">Total heures prévues :</span>
-                    <span class="font-bold">${dashboard.totalHeures}h</span>
-                </div>
-                <div class="flex items-center justify-between text-lg">
-                    <span class="text-text-secondary">Total heures supp. :</span>
-                    <span class="font-bold text-orange-400">${dashboard.totalHeuresSupp}h</span>
-                </div>
-            `;
+                <div class="flex items-center justify-between text-lg"><span class="text-text-secondary">Total heures prévues :</span><span class="font-bold">${dashboard.totalHeures}h</span></div>
+                <div class="flex items-center justify-between text-lg"><span class="text-text-secondary">Total heures supp. :</span><span class="font-bold text-orange-400">${dashboard.totalHeuresSupp}h</span></div>`;
             
-            // --- PLANNING ---
             const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
             elements.planningGrid.innerHTML = days.map(day => `
-                <div class="bg-slate-800 p-4 rounded-xl">
-                    <h4 class="font-bold text-center text-lg mb-3">${day}</h4>
-                    <div class="space-y-2">
-                         <div class="bg-slate-900 p-3 rounded-md">
-                            <p class="font-semibold text-purple-300">Midi</p>
-                            <p class="text-sm text-text-secondary">${planning.filter(p => p.day === day && p.service === 'Midi').flatMap(p => p.employes).join(', ') || 'Fermé'}</p>
-                        </div>
-                        <div class="bg-slate-900 p-3 rounded-md">
-                            <p class="font-semibold text-purple-300">Soir</p>
-                            <p class="text-sm text-text-secondary">${planning.filter(p => p.day === day && p.service === 'Soir').flatMap(p => p.employes).join(', ') || 'Fermé'}</p>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+                <div class="bg-slate-800 p-4 rounded-xl"><h4 class="font-bold text-center text-lg mb-3">${day}</h4><div class="space-y-2">
+                    <div class="bg-slate-900 p-3 rounded-md"><p class="font-semibold text-purple-300">Midi</p><p class="text-sm text-text-secondary">${planning.filter(p => p.day === day && p.service === 'Midi').flatMap(p => p.employes).join(', ') || 'Fermé'}</p></div>
+                    <div class="bg-slate-900 p-3 rounded-md"><p class="font-semibold text-purple-300">Soir</p><p class="text-sm text-text-secondary">${planning.filter(p => p.day === day && p.service === 'Soir').flatMap(p => p.employes).join(', ') || 'Fermé'}</p></div>
+                </div></div>`).join('');
 
-            // --- HEURES ---
             elements.employeesHoursGrid.innerHTML = employees.map(emp => {
                 const percentage = (emp.heuresSemaine / emp.heuresContrat) * 100;
-                return `
-                <div class="bg-slate-800 p-5 rounded-xl">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="text-xl font-bold">${emp.nom}</h4>
-                            <p class="text-text-secondary">${emp.role}</p>
-                        </div>
-                        ${emp.heuresSupp > 0 ? `<div class="px-3 py-1 bg-orange-500 text-white text-sm font-bold rounded-full">+${emp.heuresSupp}h</div>` : ''}
-                    </div>
-                    <div class="mt-4">
-                        <div class="flex justify-between text-sm text-text-secondary mb-1">
-                            <span>${emp.heuresSemaine}h / ${emp.heuresContrat}h</span>
-                            <span>${Math.round(percentage)}%</span>
-                        </div>
-                        <div class="w-full bg-slate-900 rounded-full h-2.5">
-                            <div class="bg-accent-blue h-2.5 rounded-full" style="width: ${Math.min(percentage, 100)}%"></div>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
+                return `<div class="bg-slate-800 p-5 rounded-xl"><div class="flex justify-between items-start"><div><h4 class="text-xl font-bold">${emp.nom}</h4><p class="text-text-secondary">${emp.role}</p></div>${emp.heuresSupp > 0 ? `<div class="px-3 py-1 bg-orange-500 text-white text-sm font-bold rounded-full">+${emp.heuresSupp}h</div>` : ''}</div><div class="mt-4"><div class="flex justify-between text-sm text-text-secondary mb-1"><span>${emp.heuresSemaine}h / ${emp.heuresContrat}h</span><span>${Math.round(percentage)}%</span></div><div class="w-full bg-slate-900 rounded-full h-2.5"><div class="bg-accent-blue h-2.5 rounded-full" style="width: ${Math.min(percentage, 100)}%"></div></div></div></div>`
+            }).join('');
+        }
+        
+        // --- LOGIQUE DU CHAT ---
+        function appendChatMessage(message, sender) {
+            const alignClass = sender === 'user' ? 'justify-end' : 'justify-start';
+            const colorClass = sender === 'user' ? 'bg-blue-600' : 'bg-slate-800';
+            const html = `<div class="flex ${alignClass}"><div class="p-3 rounded-lg ${colorClass} max-w-md">${message}</div></div>`;
+            elements.chatMessages.innerHTML += html;
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+        function showTypingIndicator() {
+            const html = `<div id="typing-indicator" class="flex justify-start"><div class="p-3 rounded-lg bg-slate-800"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
+            elements.chatMessages.innerHTML += html;
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if(indicator) indicator.remove();
         }
 
-        // --- Données simulées ---
-        function getSimulatedData() {
-            const employees = [
-                { id: '1', nom: 'Vanessa', role: 'Serveur', heuresContrat: 35, heuresSemaine: 39, heuresSupp: 4, present: true },
-                { id: '2', nom: 'Sarah', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 42, heuresSupp: 7, present: true },
-                { id: '3', nom: 'Oscar', role: 'Plongeur', heuresContrat: 35, heuresSemaine: 38, heuresSupp: 3, present: false },
-                { id: '4', nom: 'Louis', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 35, heuresSupp: 0, present: true },
-                { id: '5', nom: 'Alexis', role: 'Serveur', heuresContrat: 35, heuresSemaine: 41, heuresSupp: 6, present: false }
-            ];
-            const planning = [
-                { day: 'Lundi', service: 'Soir', employes: ['Vanessa', 'Sarah', 'Oscar', 'Alexis']},
-                { day: 'Mardi', service: 'Midi', employes: ['Louis', 'Alexis']},
-                { day: 'Mardi', service: 'Soir', employes: ['Vanessa', 'Louis', 'Oscar', 'Sarah']},
-            ];
-            return { employees, planning, dashboard: { totalHeures: 195, totalHeuresSupp: 20 } };
-        }
+        // --- DONNÉES SIMULÉES (FALLBACK) ---
+        function getSimulatedData() { /* ... (code des données simulées comme avant) ... */ return { employees: [{ id: '1', nom: 'Vanessa', role: 'Serveur', heuresContrat: 35, heuresSemaine: 39, heuresSupp: 4, present: true },{ id: '2', nom: 'Sarah', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 42, heuresSupp: 7, present: true },{ id: '3', nom: 'Oscar', role: 'Plongeur', heuresContrat: 35, heuresSemaine: 38, heuresSupp: 3, present: false },{ id: '4', nom: 'Louis', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 35, heuresSupp: 0, present: true },{ id: '5', nom: 'Alexis', role: 'Serveur', heuresContrat: 35, heuresSemaine: 41, heuresSupp: 6, present: false }], planning: [{ day: 'Lundi', service: 'Soir', employes: ['Vanessa', 'Sarah', 'Oscar', 'Alexis']},{ day: 'Mardi', service: 'Midi', employes: ['Louis', 'Alexis']},{ day: 'Mardi', service: 'Soir', employes: ['Vanessa', 'Louis', 'Oscar', 'Sarah']}], dashboard: { totalHeures: 195, totalHeuresSupp: 20 } }; }
 
-        // --- Initialisation ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const appData = getSimulatedData();
-            updateUI(appData);
+        // --- INITIALISATION ---
+        document.addEventListener('DOMContentLoaded', async () => {
             showPage('home');
+            const appData = await fetchInitialData();
+            updateUI(appData);
             
-            elements.chatSend.addEventListener('click', () => {
+            const handleSend = async () => {
                 const input = elements.chatInput;
-                if(input.value.trim() === '') return;
-                elements.chatMessages.innerHTML += `<div class="flex justify-end"><div class="p-3 rounded-lg bg-blue-600 max-w-md text-right">${input.value}</div></div>`;
-                setTimeout(() => {
-                    elements.chatMessages.innerHTML += `<div class="flex justify-start"><div class="p-3 rounded-lg bg-slate-800 max-w-md">Action traitée. Les données ont été mises à jour.</div></div>`;
-                    updateUI(getSimulatedData());
-                }, 1000);
+                const userMessage = input.value.trim();
+                if(userMessage === '') return;
+                
+                appendChatMessage(userMessage, 'user');
                 input.value = '';
-                elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+                showTypingIndicator();
+
+                const iaResponse = await sendMessageToN8N({ text: userMessage, airtableToken: AIRTABLE_TOKEN }); // J'inclus le token ici pour suivre votre demande, mais il devrait être dans n8n.
+                
+                hideTypingIndicator();
+                appendChatMessage(iaResponse.response || "Action traitée avec succès.", 'ia');
+
+                const updatedData = await fetchInitialData();
+                updateUI(updatedData);
+            };
+
+            elements.chatSend.addEventListener('click', handleSend);
+            elements.chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleSend();
             });
         });
     </script>
 </body>
 </html>
+

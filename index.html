@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Restaurant IA V3</title>
+    <title>Restaurant IA - Dashboard Simplifié</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0f172a;      /* Fond principal (ardoise foncée) */
-            --bg-surface: #1e293b; /* Fond des cartes (ardoise plus claire) */
+            --bg-dark: #020617;      /* Noir saphir, très sombre */
+            --bg-surface: #0f172a; /* Ardoise foncée pour les cartes */
             --border-color: #334155;
-            --text-primary: #f1f5f9;
+            --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --accent-blue: #38bdf8;
             --accent-purple: #a78bfa;
             --accent-orange: #f97316;
+            --accent-green: #4ade80;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -26,122 +27,113 @@
             animation: fadeIn 0.4s ease-in-out;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .nav-button {
-            @apply flex items-center gap-4 px-4 py-3 rounded-lg text-lg font-semibold text-text-secondary transition-all duration-200 hover:bg-slate-700 hover:text-white;
+            @apply px-4 py-2 text-lg font-semibold text-text-secondary border-b-2 border-transparent transition-all duration-200 hover:text-white;
         }
         .nav-button.active {
-            @apply bg-sky-500/10 text-accent-blue shadow-inner;
+            @apply text-accent-blue border-accent-blue;
         }
         .main-card {
-            @apply bg-bg-surface p-6 rounded-xl border border-border-color shadow-lg;
+            @apply bg-bg-surface p-6 rounded-2xl border border-border-color shadow-2xl shadow-black/20;
         }
-        .page-header {
-            @apply text-3xl font-bold text-white mb-6 flex items-center gap-3;
+        .page-title {
+            @apply text-4xl font-bold text-white mb-8;
         }
     </style>
 </head>
-<body class="min-h-screen">
-    <div class="flex">
-        <aside id="sidebar" class="w-72 bg-bg-surface h-screen sticky top-0 border-r border-border-color p-6 flex flex-col">
-            <div class="text-2xl font-extrabold mb-10">
-                <span class="align-middle">🍽️ Restaurant IA</span>
-            </div>
-            <nav class="flex flex-col space-y-3">
-                <button id="home-nav" class="nav-button active" onclick="showPage('home')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    <span>Accueil</span>
-                </button>
-                <button id="planning-nav" class="nav-button" onclick="showPage('planning')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
-                    <span>Planning</span>
-                </button>
-                <button id="hours-nav" class="nav-button" onclick="showPage('hours')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span>Heures Réelles</span>
-                </button>
+<body>
+    <!-- Barre de navigation supérieure -->
+    <header class="bg-bg-surface/80 backdrop-blur-lg sticky top-0 z-40 border-b border-border-color">
+        <div class="container mx-auto px-6 h-20 flex items-center justify-between">
+            <h1 class="text-2xl font-bold">🍽️ Restaurant IA</h1>
+            <nav class="hidden md:flex items-center gap-6">
+                <button id="home-nav" class="nav-button active" onclick="showPage('home')">Accueil</button>
+                <button id="planning-nav" class="nav-button" onclick="showPage('planning')">Planning</button>
+                <button id="hours-nav" class="nav-button" onclick="showPage('hours')">Heures</button>
             </nav>
-            <div class="mt-auto">
-                <div class="p-4 rounded-lg bg-slate-800 text-center">
-                    <p class="text-sm text-text-secondary">Prêt à vous aider !</p>
-                    <span class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 text-xs font-semibold rounded-full text-green-300 bg-green-900">
-                        <span class="size-2 bg-green-500 rounded-full animate-pulse"></span>
-                        Système en ligne
-                    </span>
-                </div>
-            </div>
-        </aside>
+            <div><!-- Espace réservé --></div>
+        </div>
+    </header>
 
-        <main class="flex-1 p-8">
-            <div id="home-page" class="page">
-                <h1 class="page-header"><span class="text-accent-blue">🤖</span> Assistant IA</h1>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="main-card">
-                        <p class="text-text-secondary font-semibold">Employés Actifs</p>
-                        <p id="stat-employees" class="text-4xl font-bold mt-2">5</p>
-                    </div>
-                    <div class="main-card">
-                        <p class="text-text-secondary font-semibold">Heures Totales / Semaine</p>
-                        <p id="stat-total-hours" class="text-4xl font-bold mt-2">195h</p>
-                    </div>
-                    <div class="main-card">
-                        <p class="text-text-secondary font-semibold">Heures Supp. / Semaine</p>
-                        <p id="stat-overtime" class="text-4xl font-bold text-amber-400 mt-2">20h</p>
-                    </div>
-                </div>
-
-                <div class="main-card h-[60vh] flex flex-col">
-                    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4">
-                        <div class="p-4 rounded-lg bg-slate-800 max-w-lg">
-                            <strong class="font-semibold">Bonjour !</strong> Je suis votre assistant.
-                            <br>Posez-moi une question ou dictez des heures.
-                            <p class="text-xs text-text-secondary mt-2">Ex: "Crée le planning de la semaine prochaine" ou "Qui travaille ce soir ?"</p>
-                        </div>
-                    </div>
-                    <div class="p-4 border-t border-border-color">
-                        <div class="flex items-center gap-4">
-                            <input id="message-input" type="text" class="w-full bg-slate-800 p-4 rounded-lg border border-transparent focus:border-accent-blue focus:outline-none" placeholder="Votre message à l'IA...">
-                            <button id="send-btn" class="size-14 rounded-lg bg-accent-blue text-white flex items-center justify-center shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="planning-page" class="page hidden">
-                <h1 class="page-header"><span class="text-accent-purple">📅</span> Planning de la Semaine</h1>
+    <!-- Contenu principal -->
+    <main class="container mx-auto p-6 md:p-8">
+        <!-- PAGE 1: ACCUEIL -->
+        <div id="home-page" class="page">
+            <h2 class="page-title">Bienvenue !</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="main-card">
-                    <div class="flex justify-start gap-4 mb-6">
-                        <button class="px-5 py-2 bg-purple-600 font-semibold rounded-lg hover:bg-purple-700">Générer avec l'IA</button>
-                        <button class="px-5 py-2 bg-slate-600 font-semibold rounded-lg hover:bg-slate-700">Exporter</button>
+                    <h3 class="text-2xl font-bold mb-4">Présents Aujourd'hui</h3>
+                    <div id="team-today" class="space-y-3">
+                        <!-- Liste des employés présents générée ici -->
                     </div>
-                    <div id="planning-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                </div>
+                <div class="main-card flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4">Aperçu de la Semaine</h3>
+                        <div id="weekly-overview" class="space-y-4">
+                            <!-- Statistiques générées ici -->
                         </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                         <button onclick="showPage('planning')" class="p-4 bg-purple-600/20 text-purple-300 rounded-lg font-semibold text-center hover:bg-purple-600/40 transition">Voir le Planning</button>
+                         <button onclick="showPage('hours')" class="p-4 bg-orange-600/20 text-orange-300 rounded-lg font-semibold text-center hover:bg-orange-600/40 transition">Voir les Heures</button>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div id="hours-page" class="page hidden">
-                <h1 class="page-header"><span class="text-accent-orange">⏱️</span> Suivi des Heures Réelles</h1>
-                <div class="main-card">
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div class="bg-slate-800 p-4 rounded-lg">
-                            <p class="text-text-secondary font-semibold">Total Heures Semaine</p>
-                            <p id="hours-total" class="text-3xl font-bold mt-1">195h</p>
-                        </div>
-                        <div class="bg-slate-800 p-4 rounded-lg">
-                            <p class="text-text-secondary font-semibold">Total Heures Supplémentaires</p>
-                            <p id="hours-overtime" class="text-3xl font-bold text-amber-400 mt-1">20h</p>
-                        </div>
-                    </div>
-                    <div id="employees-hours-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        </div>
+        <!-- PAGE 2: PLANNING -->
+        <div id="planning-page" class="page hidden">
+            <h2 class="page-title">📅 Planning de la Semaine</h2>
+            <div class="main-card">
+                <div id="planning-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-6">
+                    <!-- Planning généré ici -->
                 </div>
             </div>
-        </main>
+        </div>
+
+        <!-- PAGE 3: HEURES -->
+        <div id="hours-page" class="page hidden">
+            <h2 class="page-title">⏱️ Suivi des Heures Réelles</h2>
+            <div class="main-card">
+                <div id="employees-hours-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Heures par employé générées ici -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bouton flottant pour l'IA -->
+    <button onclick="openChatModal()" class="fixed bottom-6 right-6 size-16 bg-accent-blue rounded-full shadow-lg flex items-center justify-center text-white z-50 transform hover:scale-110 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+    </button>
+    
+    <!-- Navigation mobile en bas de page -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-bg-surface h-20 border-t border-border-color flex justify-around items-center z-40">
+        <button id="home-nav-mobile" class="nav-button active" onclick="showPage('home')">Accueil</button>
+        <button id="planning-nav-mobile" class="nav-button" onclick="showPage('planning')">Planning</button>
+        <button id="hours-nav-mobile" class="nav-button" onclick="showPage('hours')">Heures</button>
+    </nav>
+
+
+    <!-- Modale de Chat IA -->
+    <div id="chat-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/70" onclick="closeChatModal()"></div>
+        <div class="main-card w-full max-w-2xl h-[70vh] flex flex-col z-10">
+            <h3 class="text-2xl font-bold text-white mb-4">Assistant IA</h3>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-2 space-y-4">
+                <div class="p-3 rounded-lg bg-slate-800 max-w-md">Bonjour ! Comment puis-je vous aider ?</div>
+            </div>
+            <div class="mt-4 flex items-center gap-3">
+                <input id="chat-input" type="text" class="w-full bg-slate-800 p-4 rounded-lg border-2 border-transparent focus:border-accent-blue focus:outline-none" placeholder="Envoyer un message...">
+                <button id="chat-send" class="size-14 rounded-lg bg-accent-blue text-white flex items-center justify-center shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -149,115 +141,131 @@
             pages: document.querySelectorAll('.page'),
             navButtons: document.querySelectorAll('.nav-button'),
             // Page Accueil
-            statEmployees: document.getElementById('stat-employees'),
-            statTotalHours: document.getElementById('stat-total-hours'),
-            statOvertime: document.getElementById('stat-overtime'),
-            chatMessages: document.getElementById('chat-messages'),
-            messageInput: document.getElementById('message-input'),
-            sendBtn: document.getElementById('send-btn'),
+            teamToday: document.getElementById('team-today'),
+            weeklyOverview: document.getElementById('weekly-overview'),
             // Page Planning
             planningGrid: document.getElementById('planning-grid'),
             // Page Heures
-            hoursTotal: document.getElementById('hours-total'),
-            hoursOvertime: document.getElementById('hours-overtime'),
             employeesHoursGrid: document.getElementById('employees-hours-grid'),
+            // Modale Chat
+            chatModal: document.getElementById('chat-modal'),
+            chatMessages: document.getElementById('chat-messages'),
+            chatInput: document.getElementById('chat-input'),
+            chatSend: document.getElementById('chat-send'),
         };
 
         function showPage(pageId) {
-            // Cacher toutes les pages
-            elements.pages.forEach(page => page.classList.add('hidden'));
-            // Afficher la page sélectionnée
+            elements.pages.forEach(p => p.classList.add('hidden'));
             document.getElementById(`${pageId}-page`).classList.remove('hidden');
-
-            // Mettre à jour l'état actif des boutons de navigation
-            elements.navButtons.forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.id === `${pageId}-nav`) {
-                    btn.classList.add('active');
-                }
+            elements.navButtons.forEach(b => {
+                b.classList.remove('active');
+                if (b.id.startsWith(pageId)) b.classList.add('active');
             });
+            window.scrollTo(0, 0);
         }
-        
+
+        function openChatModal() { elements.chatModal.classList.remove('hidden'); elements.chatModal.classList.add('flex'); }
+        function closeChatModal() { elements.chatModal.classList.add('hidden'); elements.chatModal.classList.remove('flex'); }
+
         function updateUI(data) {
             const { employees, planning, dashboard } = data;
             
-            // --- MISE À JOUR PAGE ACCUEIL ---
-            elements.statEmployees.textContent = employees.length;
-            elements.statTotalHours.textContent = `${dashboard.totalHeures}h`;
-            elements.statOvertime.textContent = `${dashboard.totalHeuresSupp}h`;
-
-            // --- MISE À JOUR PAGE PLANNING ---
-            const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-            elements.planningGrid.innerHTML = days.map(day => {
-                const dayShifts = planning.filter(p => p.day === day);
-                return `
-                    <div class="bg-slate-800 p-4 rounded-lg">
-                        <h3 class="font-bold text-center">${day}</h3>
-                        <div class="space-y-2 mt-2">
-                        ${dayShifts.map(shift => `
-                            <div class="bg-slate-900 p-2 rounded-md text-sm">
-                                <p class="font-semibold text-text-secondary">${shift.service} <span class="text-xs">(${shift.heures})</span></p>
-                                <p class="text-xs text-purple-300">${shift.employes.join(', ')}</p>
-                            </div>
-                        `).join('')}
-                        </div>
+            // --- ACCUEIL ---
+            elements.teamToday.innerHTML = employees.filter(e => e.present).map(emp => `
+                <div class="flex items-center justify-between bg-slate-800 p-3 rounded-lg">
+                    <p class="font-bold">${emp.nom} <span class="text-sm font-normal text-text-secondary">(${emp.role})</span></p>
+                    <div class="flex items-center gap-2 text-green-400">
+                        <span class="size-2 bg-accent-green rounded-full"></span>
+                        <span class="text-sm font-semibold">Présent</span>
                     </div>
-                `;
-            }).join('');
-            
-            // --- MISE À JOUR PAGE HEURES ---
-            elements.hoursTotal.textContent = `${dashboard.totalHeures}h`;
-            elements.hoursOvertime.textContent = `${dashboard.totalHeuresSupp}h`;
-            elements.employeesHoursGrid.innerHTML = employees.map(emp => `
-                <div class="bg-slate-800 p-4 rounded-lg">
-                    <div class="flex justify-between items-center">
-                        <h4 class="text-lg font-bold">${emp.nom}</h4>
-                        ${emp.heuresSupp > 0 ? `<span class="px-2 py-1 text-xs font-bold text-amber-800 bg-amber-400 rounded-full">+${emp.heuresSupp}h</span>` : ''}
-                    </div>
-                    <p class="text-sm text-text-secondary">${emp.role}</p>
-                    <p class="mt-3 text-2xl font-semibold">${emp.heuresSemaine}h <span class="text-base text-text-secondary">/ ${emp.heuresContrat}h</span></p>
                 </div>
             `).join('');
+            
+            elements.weeklyOverview.innerHTML = `
+                <div class="flex items-center justify-between text-lg">
+                    <span class="text-text-secondary">Total heures prévues :</span>
+                    <span class="font-bold">${dashboard.totalHeures}h</span>
+                </div>
+                <div class="flex items-center justify-between text-lg">
+                    <span class="text-text-secondary">Total heures supp. :</span>
+                    <span class="font-bold text-orange-400">${dashboard.totalHeuresSupp}h</span>
+                </div>
+            `;
+            
+            // --- PLANNING ---
+            const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+            elements.planningGrid.innerHTML = days.map(day => `
+                <div class="bg-slate-800 p-4 rounded-xl">
+                    <h4 class="font-bold text-center text-lg mb-3">${day}</h4>
+                    <div class="space-y-2">
+                         <div class="bg-slate-900 p-3 rounded-md">
+                            <p class="font-semibold text-purple-300">Midi</p>
+                            <p class="text-sm text-text-secondary">${planning.filter(p => p.day === day && p.service === 'Midi').flatMap(p => p.employes).join(', ') || 'Fermé'}</p>
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-md">
+                            <p class="font-semibold text-purple-300">Soir</p>
+                            <p class="text-sm text-text-secondary">${planning.filter(p => p.day === day && p.service === 'Soir').flatMap(p => p.employes).join(', ') || 'Fermé'}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // --- HEURES ---
+            elements.employeesHoursGrid.innerHTML = employees.map(emp => {
+                const percentage = (emp.heuresSemaine / emp.heuresContrat) * 100;
+                return `
+                <div class="bg-slate-800 p-5 rounded-xl">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="text-xl font-bold">${emp.nom}</h4>
+                            <p class="text-text-secondary">${emp.role}</p>
+                        </div>
+                        ${emp.heuresSupp > 0 ? `<div class="px-3 py-1 bg-orange-500 text-white text-sm font-bold rounded-full">+${emp.heuresSupp}h</div>` : ''}
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm text-text-secondary mb-1">
+                            <span>${emp.heuresSemaine}h / ${emp.heuresContrat}h</span>
+                            <span>${Math.round(percentage)}%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-2.5">
+                            <div class="bg-accent-blue h-2.5 rounded-full" style="width: ${Math.min(percentage, 100)}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
         }
-        
-        // Simuler la réception de données
+
+        // --- Données simulées ---
         function getSimulatedData() {
             const employees = [
-                { id: '1', nom: 'Vanessa', role: 'Serveur', heuresContrat: 35, heuresSemaine: 39, heuresSupp: 4 },
-                { id: '2', nom: 'Sarah', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 42, heuresSupp: 7 },
-                { id: '3', nom: 'Oscar', role: 'Plongeur', heuresContrat: 35, heuresSemaine: 38, heuresSupp: 3 },
-                { id: '4', nom: 'Louis', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 35, heuresSupp: 0 },
-                { id: '5', nom: 'Alexis', role: 'Serveur', heuresContrat: 35, heuresSemaine: 41, heuresSupp: 6 }
+                { id: '1', nom: 'Vanessa', role: 'Serveur', heuresContrat: 35, heuresSemaine: 39, heuresSupp: 4, present: true },
+                { id: '2', nom: 'Sarah', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 42, heuresSupp: 7, present: true },
+                { id: '3', nom: 'Oscar', role: 'Plongeur', heuresContrat: 35, heuresSemaine: 38, heuresSupp: 3, present: false },
+                { id: '4', nom: 'Louis', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 35, heuresSupp: 0, present: true },
+                { id: '5', nom: 'Alexis', role: 'Serveur', heuresContrat: 35, heuresSemaine: 41, heuresSupp: 6, present: false }
             ];
             const planning = [
-                { day: 'Lundi', service: 'Soir', employes: ['Vanessa', 'Sarah', 'Oscar', 'Alexis'], heures: '18h-23h' },
-                { day: 'Mardi', service: 'Soir', employes: ['Vanessa', 'Louis', 'Oscar', 'Alexis'], heures: '18h-23h' },
-                // ... autres shifts
+                { day: 'Lundi', service: 'Soir', employes: ['Vanessa', 'Sarah', 'Oscar', 'Alexis']},
+                { day: 'Mardi', service: 'Midi', employes: ['Louis', 'Alexis']},
+                { day: 'Mardi', service: 'Soir', employes: ['Vanessa', 'Louis', 'Oscar', 'Sarah']},
             ];
-            const dashboard = { totalHeures: 195, totalHeuresSupp: 20 };
-            return { employees, planning, dashboard };
+            return { employees, planning, dashboard: { totalHeures: 195, totalHeuresSupp: 20 } };
         }
 
-        // Initialisation
+        // --- Initialisation ---
         document.addEventListener('DOMContentLoaded', () => {
-            showPage('home');
             const appData = getSimulatedData();
             updateUI(appData);
-
-            elements.sendBtn.addEventListener('click', () => {
-                const input = elements.messageInput;
+            showPage('home');
+            
+            elements.chatSend.addEventListener('click', () => {
+                const input = elements.chatInput;
                 if(input.value.trim() === '') return;
-
-                // Ajouter le message de l'utilisateur
                 elements.chatMessages.innerHTML += `<div class="flex justify-end"><div class="p-3 rounded-lg bg-blue-600 max-w-md text-right">${input.value}</div></div>`;
-                
-                // Simuler une réponse de l'IA
                 setTimeout(() => {
-                    elements.chatMessages.innerHTML += `<div class="flex justify-start"><div class="p-3 rounded-lg bg-slate-800 max-w-md">Action effectuée. Le planning a été mis à jour.</div></div>`;
-                    // Recharger les données pour refléter le changement
+                    elements.chatMessages.innerHTML += `<div class="flex justify-start"><div class="p-3 rounded-lg bg-slate-800 max-w-md">Action traitée. Les données ont été mises à jour.</div></div>`;
                     updateUI(getSimulatedData());
                 }, 1000);
-                
                 input.value = '';
                 elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
             });

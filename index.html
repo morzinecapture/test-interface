@@ -1,310 +1,138 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant IA - Dashboard Simplifié</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #020617;      /* Noir saphir, très sombre */
-            --bg-surface: #0f172a; /* Ardoise foncée pour les cartes */
-            --border-color: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-blue: #38bdf8;
-            --accent-purple: #a78bfa;
-            --accent-orange: #f97316;
-            --accent-green: #4ade80;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
-            /* Ajout pour que le menu mobile ne cache pas le contenu */
-            padding-bottom: 80px; 
-        }
-        .page {
-            animation: fadeIn 0.4s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .nav-button {
-            @apply px-4 py-2 text-lg font-semibold text-text-secondary border-b-2 border-transparent transition-all duration-200 hover:text-white;
-        }
-        .nav-button.active {
-            @apply text-accent-blue border-accent-blue;
-        }
-        .main-card {
-            @apply bg-bg-surface p-6 rounded-2xl border border-border-color shadow-2xl shadow-black/20;
-        }
-        .page-title {
-            @apply text-4xl font-bold text-white mb-8;
-        }
-        /* Style pour l'indicateur de frappe */
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
-        .typing-indicator span { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--text-secondary); animation: bounce 1.4s infinite ease-in-out both; }
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Restaurant IA - Dashboard Simplifié</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-dark:#020617;--bg-surface:#0f172a;--border-color:#334155;
+      --text-primary:#f8fafc;--text-secondary:#94a3b8;
+      --accent-blue:#38bdf8;--accent-purple:#a78bfa;--accent-orange:#f97316;--accent-green:#4ade80;
+    }
+    body{font-family:'Inter',sans-serif;background-color:var(--bg-dark);color:var(--text-primary);padding-bottom:80px}
+    .page{animation:fadeIn .4s ease-in-out}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+    .nav-button{@apply px-4 py-2 text-lg font-semibold text-text-secondary border-b-2 border-transparent transition-all duration-200 hover:text-white;}
+    .nav-button.active{@apply text-accent-blue border-accent-blue;}
+    .main-card{@apply bg-bg-surface p-6 rounded-2xl border border-border-color shadow-2xl shadow-black/20;}
+    .page-title{@apply text-4xl font-bold text-white mb-8;}
+    @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+    .typing-indicator span{display:inline-block;width:8px;height:8px;border-radius:50%;background-color:var(--text-secondary);animation:bounce 1.4s infinite ease-in-out both}
+    .typing-indicator span:nth-child(1){animation-delay:-.32s}
+    .typing-indicator span:nth-child(2){animation-delay:-.16s}
+  </style>
 </head>
-<body>
-    <!-- Barre de navigation supérieure -->
-    <header class="bg-bg-surface/80 backdrop-blur-lg sticky top-0 z-40 border-b border-border-color">
-        <div class="container mx-auto px-6 h-20 flex items-center justify-between">
-            <h1 class="text-2xl font-bold">🍽️ Restaurant IA</h1>
-            <nav class="hidden md:flex items-center gap-6">
-                <button id="home-nav" class="nav-button active" onclick="showPage('home')">Accueil</button>
-                <button id="planning-nav" class="nav-button" onclick="showPage('planning')">Planning</button>
-                <button id="hours-nav" class="nav-button" onclick="showPage('hours')">Heures</button>
-            </nav>
-            <div><!-- Espace réservé --></div>
-        </div>
-    </header>
-
-    <!-- Contenu principal -->
-    <main class="container mx-auto p-6 md:p-8">
-        <!-- PAGE 1: ACCUEIL -->
-        <div id="home-page" class="page">
-            <h2 class="page-title">Bienvenue !</h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="main-card">
-                    <h3 class="text-2xl font-bold mb-4">Présents Aujourd'hui</h3>
-                    <div id="team-today" class="space-y-3">
-                        <!-- Liste des employés présents générée ici -->
-                    </div>
-                </div>
-                <div class="main-card flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-2xl font-bold mb-4">Aperçu de la Semaine</h3>
-                        <div id="weekly-overview" class="space-y-4">
-                            <!-- Statistiques générées ici -->
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mt-6">
-                         <button onclick="showPage('planning')" class="p-4 bg-purple-600/20 text-purple-300 rounded-lg font-semibold text-center hover:bg-purple-600/40 transition">Voir le Planning</button>
-                         <button onclick="showPage('hours')" class="p-4 bg-orange-600/20 text-orange-300 rounded-lg font-semibold text-center hover:bg-orange-600/40 transition">Voir les Heures</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- PAGE 2: PLANNING -->
-        <div id="planning-page" class="page hidden">
-            <h2 class="page-title">📅 Planning de la Semaine</h2>
-            <div class="main-card">
-                <div id="planning-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-6">
-                    <!-- Planning généré ici -->
-                </div>
-            </div>
-        </div>
-
-        <!-- PAGE 3: HEURES -->
-        <div id="hours-page" class="page hidden">
-            <h2 class="page-title">⏱️ Suivi des Heures Réelles</h2>
-            <div class="main-card">
-                <div id="employees-hours-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Heures par employé générées ici -->
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Bouton flottant rehaussé sur mobile -->
-    <button onclick="openChatModal()" class="fixed bottom-24 right-6 size-16 bg-accent-blue rounded-full shadow-lg flex items-center justify-center text-white z-50 transform hover:scale-110 transition-transform md:bottom-6">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
-    </button>
-    
-    <!-- Navigation mobile en bas de page -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-bg-surface h-20 border-t border-border-color flex justify-around items-center z-40">
-        <button id="home-nav-mobile" class="nav-button active" onclick="showPage('home')">Accueil</button>
-        <button id="planning-nav-mobile" class="nav-button" onclick="showPage('planning')">Planning</button>
-        <button id="hours-nav-mobile" class="nav-button" onclick="showPage('hours')">Heures</button>
-    </nav>
-
-
-    <!-- Modale de Chat IA -->
-    <div id="chat-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/70" onclick="closeChatModal()"></div>
-        <div class="main-card w-full max-w-2xl h-[70vh] flex flex-col z-10">
-            <h3 class="text-2xl font-bold text-white mb-4">Assistant IA</h3>
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-2 space-y-4">
-                <div class="p-3 rounded-lg bg-slate-800 max-w-md">Bonjour ! Comment puis-je vous aider ?</div>
-            </div>
-            <div class="mt-4 flex items-center gap-3">
-                <div class="relative flex-1">
-                    <input id="chat-input" type="text" class="w-full bg-slate-800 p-4 rounded-lg border-2 border-transparent focus:border-accent-blue focus:outline-none pr-24" placeholder="Envoyer un message...">
-                    <div class="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
-                        <button title="Photo" class="size-10 rounded-full flex items-center justify-center text-text-secondary hover:bg-slate-700 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5L14.5 4Z"/><circle cx="12" cy="13" r="3"/></svg>
-                        </button>
-                        <button title="Vocal" class="size-10 rounded-full flex items-center justify-center text-text-secondary hover:bg-slate-700 transition">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-                        </button>
-                    </div>
-                </div>
-                <button id="chat-send" class="size-14 rounded-lg bg-accent-blue text-white flex items-center justify-center shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                </button>
-            </div>
-        </div>
+<body class="min-h-screen">
+  <!-- En-tête -->
+  <header class="sticky top-0 z-30 bg-bg-surface/80 backdrop-blur border-b border-border-color">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-2xl font-extrabold">Resto·IA</h1>
+      <nav class="hidden md:flex gap-6">
+        <button id="home-nav" class="nav-button active" onclick="showPage('home')">Accueil</button>
+        <button id="planning-nav" class="nav-button" onclick="showPage('planning')">Planning</button>
+        <button id="hours-nav" class="nav-button" onclick="showPage('hours')">Heures</button>
+      </nav>
+      <button class="rounded-xl px-4 py-2 bg-accent-blue text-black font-semibold" onclick="openChatModal()">Assistant IA</button>
     </div>
+  </header>
 
-    <script>
-        // --- CONFIGURATION ---
-        const N8N_WEBHOOK_URL = 'https://morzinecap.app.n8n.cloud/webhook/23ed6cad-a469-446c-bccd-fe294d0f1839';
-        
-        // --- ATTENTION : RISQUE DE SÉCURITÉ MAJEUR ---
-        // Le token Airtable ci-dessous ne doit JAMAIS être stocké dans le code de votre site web.
-        // N'importe quel visiteur peut le voir et obtenir un accès complet à votre base Airtable.
-        // Ce token doit être stocké de manière sécurisée dans les "Credentials" de votre workflow n8n.
-        // Je l'inclus ici uniquement parce que vous l'avez demandé explicitement pour des tests.
-        const AIRTABLE_TOKEN = 'patYKX4FAPXVkvaG4.b63e717dd567c08cf287b75011f38f0e0b4c9a0535fe8f85ddcfbd3d8b907fe0';
+  <!-- Contenu pages -->
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-10">
+    <!-- Page Accueil -->
+    <section id="home-page" class="page">
+      <h2 class="page-title">Vue d’ensemble</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="main-card">
+          <h3 class="text-xl font-bold mb-4">Équipe du jour</h3>
+          <div id="team-today" class="space-y-3"></div>
+        </div>
+        <div class="main-card">
+          <h3 class="text-xl font-bold mb-4">Semaine</h3>
+          <div id="weekly-overview" class="space-y-3"></div>
+        </div>
+      </div>
+    </section>
 
+    <!-- Page Planning -->
+    <section id="planning-page" class="page hidden">
+      <h2 class="page-title">Planning</h2>
+      <div id="planning-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </section>
 
-        // --- ÉLÉMENTS DU DOM ---
-        const elements = {
-            pages: document.querySelectorAll('.page'),
-            navButtons: document.querySelectorAll('.nav-button'),
-            teamToday: document.getElementById('team-today'),
-            weeklyOverview: document.getElementById('weekly-overview'),
-            planningGrid: document.getElementById('planning-grid'),
-            employeesHoursGrid: document.getElementById('employees-hours-grid'),
-            chatModal: document.getElementById('chat-modal'),
-            chatMessages: document.getElementById('chat-messages'),
-            chatInput: document.getElementById('chat-input'),
-            chatSend: document.getElementById('chat-send'),
-        };
-        
-        // --- NAVIGATION ---
-        function showPage(pageId) {
-            elements.pages.forEach(p => p.classList.add('hidden'));
-            document.getElementById(`${pageId}-page`).classList.remove('hidden');
-            elements.navButtons.forEach(b => {
-                b.classList.remove('active');
-                if (b.id.startsWith(pageId)) b.classList.add('active');
-            });
-            window.scrollTo(0, 0);
-        }
-        function openChatModal() { elements.chatModal.classList.remove('hidden'); elements.chatModal.classList.add('flex'); }
-        function closeChatModal() { elements.chatModal.classList.add('hidden'); elements.chatModal.classList.remove('flex'); }
-        
-        // --- COMMUNICATION AVEC LE BACKEND (N8N) ---
-        async function fetchInitialData() {
-            try {
-                const response = await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'getAllData' })
-                });
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-                return await response.json();
-            } catch (error) {
-                console.warn("N8N Fetch Error: Could not load live data. Using fallback.", error);
-                return getSimulatedData(); // Fallback en cas d'erreur
-            }
-        }
-        
-        async function sendMessageToN8N(payload) {
-            try {
-                const response = await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-                return await response.json();
-            } catch (error) {
-                console.error("N8N Send Error:", error);
-                return { response: "Désolé, une erreur de communication est survenue." };
-            }
-        }
+    <!-- Page Heures -->
+    <section id="hours-page" class="page hidden">
+      <h2 class="page-title">Heures & HS</h2>
+      <div id="employees-hours-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+  </main>
 
-        // --- MISE À JOUR DE L'INTERFACE ---
-        function updateUI(data) {
-            if (!data || !data.employees || !data.planning || !data.dashboard) {
-                console.error("Data is invalid, cannot update UI.", data);
-                return;
-            }
-            const { employees, planning, dashboard } = data;
-            
-            elements.teamToday.innerHTML = employees.filter(e => e.present).map(emp => `
-                <div class="flex items-center justify-between bg-slate-800 p-3 rounded-lg">
-                    <p class="font-bold">${emp.nom} <span class="text-sm font-normal text-text-secondary">(${emp.role})</span></p>
-                    <div class="flex items-center gap-2 text-green-400"><span class="size-2 bg-accent-green rounded-full"></span><span class="text-sm font-semibold">Présent</span></div>
-                </div>`).join('') || `<p class="text-text-secondary">Personne n'est indiqué comme présent.</p>`;
-            
-            elements.weeklyOverview.innerHTML = `
-                <div class="flex items-center justify-between text-lg"><span class="text-text-secondary">Total heures prévues :</span><span class="font-bold">${dashboard.totalHeures}h</span></div>
-                <div class="flex items-center justify-between text-lg"><span class="text-text-secondary">Total heures supp. :</span><span class="font-bold text-orange-400">${dashboard.totalHeuresSupp}h</span></div>`;
-            
-            const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-            elements.planningGrid.innerHTML = days.map(day => `
-                <div class="bg-slate-800 p-4 rounded-xl"><h4 class="font-bold text-center text-lg mb-3">${day}</h4><div class="space-y-2">
-                    <div class="bg-slate-900 p-3 rounded-md"><p class="font-semibold text-purple-300">Midi</p><p class="text-sm text-text-secondary">${planning.filter(p => p.day === day && p.service === 'Midi').flatMap(p => p.employes).join(', ') || 'Fermé'}</p></div>
-                    <div class="bg-slate-900 p-3 rounded-md"><p class="font-semibold text-purple-300">Soir</p><p class="text-sm text-text-secondary">${planning.filter(p => p.day === day && p.service === 'Soir').flatMap(p => p.employes).join(', ') || 'Fermé'}</p></div>
-                </div></div>`).join('');
+  <!-- Navigation mobile bas de page -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-bg-surface h-20 border-t border-border-color flex justify-around items-center z-40">
+    <button id="home-nav-mobile" class="nav-button active" onclick="showPage('home')">Accueil</button>
+    <button id="planning-nav-mobile" class="nav-button" onclick="showPage('planning')">Planning</button>
+    <button id="hours-nav-mobile" class="nav-button" onclick="showPage('hours')">Heures</button>
+  </nav>
 
-            elements.employeesHoursGrid.innerHTML = employees.map(emp => {
-                const percentage = (emp.heuresSemaine / emp.heuresContrat) * 100;
-                return `<div class="bg-slate-800 p-5 rounded-xl"><div class="flex justify-between items-start"><div><h4 class="text-xl font-bold">${emp.nom}</h4><p class="text-text-secondary">${emp.role}</p></div>${emp.heuresSupp > 0 ? `<div class="px-3 py-1 bg-orange-500 text-white text-sm font-bold rounded-full">+${emp.heuresSupp}h</div>` : ''}</div><div class="mt-4"><div class="flex justify-between text-sm text-text-secondary mb-1"><span>${emp.heuresSemaine}h / ${emp.heuresContrat}h</span><span>${Math.round(percentage)}%</span></div><div class="w-full bg-slate-900 rounded-full h-2.5"><div class="bg-accent-blue h-2.5 rounded-full" style="width: ${Math.min(percentage, 100)}%"></div></div></div></div>`
-            }).join('');
-        }
-        
-        // --- LOGIQUE DU CHAT ---
-        function appendChatMessage(message, sender) {
-            const alignClass = sender === 'user' ? 'justify-end' : 'justify-start';
-            const colorClass = sender === 'user' ? 'bg-blue-600' : 'bg-slate-800';
-            const html = `<div class="flex ${alignClass}"><div class="p-3 rounded-lg ${colorClass} max-w-md">${message}</div></div>`;
-            elements.chatMessages.innerHTML += html;
-            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
-        }
-        function showTypingIndicator() {
-            const html = `<div id="typing-indicator" class="flex justify-start"><div class="p-3 rounded-lg bg-slate-800"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
-            elements.chatMessages.innerHTML += html;
-            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
-        }
-        function hideTypingIndicator() {
-            const indicator = document.getElementById('typing-indicator');
-            if(indicator) indicator.remove();
-        }
+  <!-- Modale de Chat IA -->
+  <div id="chat-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/70" onclick="closeChatModal()"></div>
+    <div class="main-card w-full max-w-2xl h-[70vh] flex flex-col z-10">
+      <h3 class="text-2xl font-bold text-white mb-4">Assistant IA</h3>
+      <div id="chat-messages" class="flex-1 overflow-y-auto p-2 space-y-4">
+        <div class="p-3 rounded-lg bg-slate-800 max-w-md">Bonjour ! Comment puis-je vous aider ?</div>
+      </div>
+      <div class="mt-4 flex items-center gap-3">
+        <div class="relative flex-1">
+          <input id="chat-input" type="text" class="w-full bg-slate-800 p-4 rounded-lg border-2 border-transparent focus:border-accent-blue focus:outline-none pr-24" placeholder="Envoyer un message.">
+          <div class="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
+            <button title="Photo" class="size-10 rounded-full flex items-center justify-center text-text-secondary hover:bg-slate-700 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5L14.5 4Z"/><circle cx="12" cy="13" r="3"/></svg>
+            </button>
+            <button title="Vocal" class="size-10 rounded-full flex items-center justify-center text-text-secondary hover:bg-slate-700 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+            </button>
+          </div>
+        </div>
+        <button id="chat-send" class="size-14 rounded-lg bg-accent-blue text-black font-semibold flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
 
-        // --- DONNÉES SIMULÉES (FALLBACK) ---
-        function getSimulatedData() { /* ... (code des données simulées comme avant) ... */ return { employees: [{ id: '1', nom: 'Vanessa', role: 'Serveur', heuresContrat: 35, heuresSemaine: 39, heuresSupp: 4, present: true },{ id: '2', nom: 'Sarah', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 42, heuresSupp: 7, present: true },{ id: '3', nom: 'Oscar', role: 'Plongeur', heuresContrat: 35, heuresSemaine: 38, heuresSupp: 3, present: false },{ id: '4', nom: 'Louis', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 35, heuresSupp: 0, present: true },{ id: '5', nom: 'Alexis', role: 'Serveur', heuresContrat: 35, heuresSemaine: 41, heuresSupp: 6, present: false }], planning: [{ day: 'Lundi', service: 'Soir', employes: ['Vanessa', 'Sarah', 'Oscar', 'Alexis']},{ day: 'Mardi', service: 'Midi', employes: ['Louis', 'Alexis']},{ day: 'Mardi', service: 'Soir', employes: ['Vanessa', 'Louis', 'Oscar', 'Sarah']}], dashboard: { totalHeures: 195, totalHeuresSupp: 20 } }; }
+  <script>
+    // --- CONFIG ---
+    const N8N_WEBHOOK_URL = 'https://morzinecap.app.n8n.cloud/webhook/23ed6cad-a469-446c-bccd-fe294d0f1839';
 
-        // --- INITIALISATION ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            showPage('home');
-            const appData = await fetchInitialData();
-            updateUI(appData);
-            
-            const handleSend = async () => {
-                const input = elements.chatInput;
-                const userMessage = input.value.trim();
-                if(userMessage === '') return;
-                
-                appendChatMessage(userMessage, 'user');
-                input.value = '';
-                showTypingIndicator();
+    // --- ÉLÉMENTS DU DOM ---
+    const elements = {
+      pages: document.querySelectorAll('.page'),
+      navButtons: document.querySelectorAll('.nav-button'),
+      teamToday: document.getElementById('team-today'),
+      weeklyOverview: document.getElementById('weekly-overview'),
+      planningGrid: document.getElementById('planning-grid'),
+      employeesHoursGrid: document.getElementById('employees-hours-grid'),
+      chatModal: document.getElementById('chat-modal'),
+      chatMessages: document.getElementById('chat-messages'),
+      chatInput: document.getElementById('chat-input'),
+      chatSend: document.getElementById('chat-send'),
+    };
 
-                const iaResponse = await sendMessageToN8N({ text: userMessage, airtableToken: AIRTABLE_TOKEN }); // J'inclus le token ici pour suivre votre demande, mais il devrait être dans n8n.
-                
-                hideTypingIndicator();
-                appendChatMessage(iaResponse.response || "Action traitée avec succès.", 'ia');
+    // --- NAVIGATION ---
+    function showPage(pageId){
+      elements.pages.forEach(p=>p.classList.add('hidden'));
+      document.getElementById(`${pageId}-page`).classList.remove('hidden');
+      elements.navButtons.forEach(b=>{
+        b.classList.remove('active');
+        if(b.id.startsWith(pageId)) b.classList.add('active');
+      });
+      window.scrollTo(0,0);
+    }
+    function openChatModal(){ elements.chatModal.classList.remove('hidden'); elements.chatModal.classList.add('flex'); }
+    function closeChatModal(){ elements.chatModal.classList.add('hidden'); elements.chatModal.classList.remove('flex'); }
 
-                const updatedData = await fetchInitialData();
-                updateUI(updatedData);
-            };
-
-            elements.chatSend.addEventListener('click', handleSend);
-            elements.chatInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') handleSend();
-            });
-        });
-    </script>
-</body>
-</html>
-
+    // --- COMMUNICATION AVEC N8N ---
+    async function fetchInitialDa

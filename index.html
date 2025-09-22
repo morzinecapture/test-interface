@@ -4,19 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assistant Restaurant IA - Dashboard Complet</title>
-    <!-- Chargement de Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Couleurs principales pour un thème sombre */
             --dark-bg: #1a202c;
             --dark-surface: #2d3748;
             --dark-card: #4a5568;
             --dark-text: #e2e8f0;
             --dark-accent: #a0aec0;
-            
-            /* Dégradés thématiques par page */
             --chat-gradient: linear-gradient(135deg, #4c51bf 0%, #6b46c1 100%);
             --planning-gradient: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
             --hours-gradient: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
@@ -35,6 +31,435 @@
         .text-gradient-chat {
             background-image: var(--chat-gradient);
             -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .bg-gradient-planning {
+            background-image: var(--planning-gradient);
+        }
+        
+        .text-gradient-planning {
+            background-image: var(--planning-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .bg-gradient-hours {
+            background-image: var(--hours-gradient);
+        }
+
+        .text-gradient-hours {
+            background-image: var(--hours-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-button {
+            @apply flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-gray-400 hover:text-white;
+        }
+
+        .nav-button.active.chat {
+            @apply bg-blue-700 text-white shadow-md;
+        }
+
+        .nav-button.active.planning {
+            @apply bg-purple-700 text-white shadow-md;
+        }
+
+        .nav-button.active.hours {
+            @apply bg-red-600 text-white shadow-md;
+        }
+
+        .page {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animation pour le menu mobile */
+        .mobile-menu-enter {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .mobile-menu-exit {
+            animation: slideUp 0.3s ease-in;
+        }
+
+        @keyframes slideDown {
+            from { 
+                opacity: 0; 
+                transform: translateY(-20px); 
+                max-height: 0;
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+                max-height: 200px;
+            }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 1; 
+                transform: translateY(0); 
+                max-height: 200px;
+            }
+            to { 
+                opacity: 0; 
+                transform: translateY(-20px); 
+                max-height: 0;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 bg-gray-800 bg-opacity-95 backdrop-blur-lg shadow-lg">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <!-- Ligne principale de navigation -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl font-extrabold text-gradient-chat">
+                        <span class="align-middle">🍽️ Restaurant IA</span>
+                    </span>
+                </div>
+                
+                <!-- Menu de navigation pour écrans larges -->
+                <div class="hidden sm:flex items-center space-x-2 md:space-x-4">
+                    <button id="chat-tab" class="nav-button active chat" onclick="showPage('chat')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7.9 20A9.3 9.3 0 0 1 4 16.1L2 22l6-2Z"/>
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                        Chat
+                    </button>
+                    <button id="planning-tab" class="nav-button planning" onclick="showPage('planning')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 2v4"/><path d="M16 2v4"/>
+                            <rect width="18" height="18" x="3" y="4" rx="2"/>
+                            <path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/>
+                            <path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/>
+                            <path d="M16 18h.01"/>
+                        </svg>
+                        Planning
+                    </button>
+                    <button id="hours-tab" class="nav-button hours" onclick="showPage('hours')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 2h4"/><path d="M12 14v-4"/>
+                            <circle cx="12" cy="12" r="9"/>
+                        </svg>
+                        Heures Réelles
+                    </button>
+                </div>
+                
+                <!-- Bouton de menu mobile + Status -->
+                <div class="flex items-center gap-3">
+                    <button id="mobile-menu-button" class="sm:hidden p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors duration-200">
+                        <svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" x2="20" y1="12" y2="12"/>
+                            <line x1="4" x2="20" y1="6" y2="6"/>
+                            <line x1="4" x2="20" y1="18" y2="18"/>
+                        </svg>
+                        <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
+                            <path d="M18 6L6 18"/>
+                            <path d="M6 6l12 12"/>
+                        </svg>
+                    </button>
+                    
+                    <span id="status-indicator" class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full text-emerald-300 bg-emerald-800">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                        En ligne
+                    </span>
+                </div>
+            </div>
+
+            <!-- Menu mobile déroulant -->
+            <div id="mobile-nav-menu" class="sm:hidden overflow-hidden transition-all duration-300 ease-in-out" style="max-height: 0;">
+                <div class="pt-4 pb-2 border-t border-gray-700 mt-4">
+                    <div class="flex flex-col space-y-2">
+                        <button id="chat-tab-mobile" class="nav-button active chat w-full justify-start" onclick="showPage('chat'); toggleMobileMenu();">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M7.9 20A9.3 9.3 0 0 1 4 16.1L2 22l6-2Z"/>
+                                <circle cx="12" cy="12" r="10"/>
+                            </svg>
+                            Chat IA
+                        </button>
+                        <button id="planning-tab-mobile" class="nav-button planning w-full justify-start" onclick="showPage('planning'); toggleMobileMenu();">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 2v4"/><path d="M16 2v4"/>
+                                <rect width="18" height="18" x="3" y="4" rx="2"/>
+                                <path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/>
+                                <path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/>
+                                <path d="M16 18h.01"/>
+                            </svg>
+                            Planning Équipes
+                        </button>
+                        <button id="hours-tab-mobile" class="nav-button hours w-full justify-start" onclick="showPage('hours'); toggleMobileMenu();">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 2h4"/><path d="M12 14v-4"/>
+                                <circle cx="12" cy="12" r="9"/>
+                            </svg>
+                            Heures Réelles
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="flex-1 flex flex-col sm:flex-row bg-gray-900">
+        <!-- Sidebar - Masquée sur mobile -->
+        <aside class="hidden sm:block sm:w-80 bg-gray-800 p-6 md:p-8 border-r border-gray-700 shadow-xl">
+            <!-- Section Vue d'ensemble -->
+            <section class="mb-8">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">📊 Vue d'ensemble</h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="bg-gray-700 p-4 rounded-lg border border-gray-600 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400">Employés actifs</p>
+                            <span id="sidebar-employees" class="text-2xl font-extrabold text-white">5</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg border border-gray-600 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400">Heures semaine</p>
+                            <span id="sidebar-hours" class="text-2xl font-extrabold text-white">195h</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg border border-gray-600 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400">Heures sup</p>
+                            <span id="sidebar-overtime" class="text-2xl font-extrabold text-white">20h</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Alertes -->
+            <section class="mb-8">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">🚨 Alertes RH</h3>
+                <div id="sidebar-alerts" class="space-y-4">
+                    <div class="p-4 rounded-lg bg-yellow-800 border border-yellow-700 text-yellow-200 font-medium">
+                        ⚠️ Vigilance requise : 20h d'heures sup.
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto">
+            <!-- Chat Page -->
+            <div id="chat-page" class="page active flex flex-col h-full bg-gray-800 rounded-xl shadow-lg">
+                <div class="bg-gradient-chat text-white p-6 rounded-t-xl text-center shadow-inner">
+                    <h2 class="text-xl font-bold mb-1">🤖 Assistant IA Restaurant</h2>
+                    <p class="text-sm opacity-90">Chat • Vocal • Photo • Planning automatisé</p>
+                </div>
+                
+                <div id="chat-messages" class="flex-1 p-4 sm:p-6 overflow-y-auto bg-gray-900 space-y-4">
+                    <div class="flex justify-start">
+                        <div class="bg-gray-600 text-gray-100 p-4 rounded-2xl rounded-bl-lg shadow-sm text-sm max-w-lg border border-gray-600">
+                            <strong class="font-semibold">👋 Bonjour !</strong> Je suis votre assistant restaurant IA.
+                            <br><br>
+                            <strong>Je peux vous aider à :</strong>
+                            <ul class="list-disc pl-4 mt-2 space-y-1">
+                                <li>📅 Gérer le planning des employés automatiquement</li>
+                                <li>🎤 Enregistrer les horaires par message vocal</li>
+                                <li>📸 Traiter vos factures en photo</li>
+                                <li>📊 Suivre les heures supplémentaires en temps réel</li>
+                                <li>🍽️ Créer des menus du jour visuels</li>
+                            </ul>
+                            <p class="mt-2 text-xs text-gray-400">Commencez par me poser une question ou dictez vos horaires !</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-4 sm:p-6 bg-gray-800 border-t border-gray-700">
+                    <div class="p-3 mb-4 rounded-lg border border-blue-400 bg-blue-900 text-blue-100 text-sm">
+                        <strong>💡 Exemples d'utilisation :</strong><br>
+                        • <em>"Créer le planning de la semaine prochaine"</em><br>
+                        • <em>"Vanessa travaille de 9h à 17h demain"</em><br>
+                        • <em>"Plat du jour : Coq au vin 18,50€"</em><br>
+                        • <em>"Qui travaille mardi soir ?"</em>
+                    </div>
+                    
+                    <div class="flex items-end gap-3">
+                        <div class="flex-1 relative">
+                            <textarea 
+                                id="message-input" 
+                                class="w-full pl-5 pr-14 py-4 rounded-xl text-sm border-2 border-gray-700 bg-gray-800 text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all resize-none overflow-hidden"
+                                placeholder="Tapez votre message..."
+                                rows="1"
+                            ></textarea>
+                        </div>
+                        <button id="send-btn" class="w-12 h-12 rounded-xl bg-gradient-chat text-white flex items-center justify-center shadow-lg transform active:scale-95 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m22 2-7 20-4-9-9-4 20-7Z"/>
+                                <path d="M22 2 11 13"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Planning Page -->
+            <div id="planning-page" class="page hidden">
+                <div class="bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg mb-6 sm:mb-8 border border-gray-700">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-gradient-planning mb-2">📅 Planning Restaurant</h1>
+                    <p class="text-gray-400">Gestion automatisée des horaires</p>
+                </div>
+                
+                <div class="text-center text-gray-400 mt-12">
+                    <p>Fonctionnalité de planning en développement...</p>
+                </div>
+            </div>
+
+            <!-- Hours Page -->
+            <div id="hours-page" class="page hidden">
+                <div class="bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg mb-6 sm:mb-8 border border-gray-700">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-gradient-hours mb-2">⏰ Heures Réelles</h1>
+                    <p class="text-gray-400">Suivi des heures effectives</p>
+                </div>
+                
+                <div class="text-center text-gray-400 mt-12">
+                    <p>Fonctionnalité de suivi des heures en développement...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentPage = 'chat';
+
+        // Navigation entre les pages
+        function showPage(pageId) {
+            currentPage = pageId;
+            
+            // Mise à jour des boutons desktop
+            document.querySelectorAll('.hidden.sm\\:flex .nav-button, .sm\\:flex .nav-button').forEach(btn => {
+                btn.classList.remove('active', 'chat', 'planning', 'hours');
+                if (btn.id.includes(pageId)) {
+                    btn.classList.add('active', pageId);
+                }
+            });
+            
+            // Mise à jour des boutons mobile
+            document.querySelectorAll('#mobile-nav-menu .nav-button').forEach(btn => {
+                btn.classList.remove('active', 'chat', 'planning', 'hours');
+                if (btn.id.includes(pageId)) {
+                    btn.classList.add('active', pageId);
+                }
+            });
+
+            // Affichage de la page
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            document.getElementById(`${pageId}-page`).classList.remove('hidden');
+        }
+
+        // Toggle du menu mobile - FONCTION CORRIGÉE
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-nav-menu');
+            const menuIcon = document.getElementById('menu-icon');
+            const closeIcon = document.getElementById('close-icon');
+            
+            if (menu.style.maxHeight === '0px' || menu.style.maxHeight === '') {
+                // Ouvrir le menu
+                menu.style.maxHeight = '200px';
+                menu.classList.add('mobile-menu-enter');
+                menuIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+            } else {
+                // Fermer le menu
+                menu.style.maxHeight = '0px';
+                menu.classList.remove('mobile-menu-enter');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Bouton menu mobile
+            document.getElementById('mobile-menu-button').addEventListener('click', toggleMobileMenu);
+            
+            // Fermer le menu au clic en dehors
+            document.addEventListener('click', function(event) {
+                const menu = document.getElementById('mobile-nav-menu');
+                const button = document.getElementById('mobile-menu-button');
+                
+                if (!menu.contains(event.target) && !button.contains(event.target)) {
+                    if (menu.style.maxHeight !== '0px' && menu.style.maxHeight !== '') {
+                        toggleMobileMenu();
+                    }
+                }
+            });
+            
+            // Auto-resize textarea
+            const messageInput = document.getElementById('message-input');
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+            
+            // Envoyer message
+            document.getElementById('send-btn').addEventListener('click', function() {
+                const message = messageInput.value.trim();
+                if (message) {
+                    addMessage('user', message);
+                    messageInput.value = '';
+                    messageInput.style.height = 'auto';
+                    
+                    // Simuler réponse IA
+                    setTimeout(() => {
+                        addMessage('assistant', 'Message reçu ! Je traite votre demande...');
+                    }, 1000);
+                }
+            });
+            
+            // Envoyer avec Entrée
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById('send-btn').click();
+                }
+            });
+        });
+
+        function addMessage(sender, text) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('flex', sender === 'user' ? 'justify-end' : 'justify-start');
+            
+            const bubbleClass = sender === 'user' 
+                ? 'bg-blue-600 text-white rounded-br-lg' 
+                : 'bg-gray-600 text-gray-100 rounded-bl-lg';
+            
+            messageDiv.innerHTML = `
+                <div class="${bubbleClass} p-4 rounded-2xl shadow-sm text-sm max-w-lg border border-gray-600">
+                    ${text}
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }

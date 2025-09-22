@@ -8,8 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #020617;      /* Noir saphir, très sombre */
-            --bg-surface: #0f172a; /* Ardoise foncée pour les cartes */
+            --bg-dark: #020617;
+            --bg-surface: #0f172a;
             --border-color: #334155;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
@@ -22,7 +22,6 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-primary);
-            /* Ajout pour que le menu mobile ne cache pas le contenu */
             padding-bottom: 80px; 
         }
         .page {
@@ -44,7 +43,6 @@
         .page-title {
             @apply text-4xl font-bold text-white mb-8;
         }
-        /* Style pour l'indicateur de frappe */
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
         .typing-indicator span { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--text-secondary); animation: bounce 1.4s infinite ease-in-out both; }
         .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
@@ -52,6 +50,7 @@
     </style>
 </head>
 <body>
+    <!-- Barre de navigation supérieure -->
     <header class="bg-bg-surface/80 backdrop-blur-lg sticky top-0 z-40 border-b border-border-color">
         <div class="container mx-auto px-6 h-20 flex items-center justify-between">
             <h1 class="text-2xl font-bold">🍽️ Restaurant IA</h1>
@@ -64,20 +63,20 @@
         </div>
     </header>
 
+    <!-- Contenu principal -->
     <main class="container mx-auto p-6 md:p-8">
+        <!-- PAGE 1: ACCUEIL -->
         <div id="home-page" class="page">
             <h2 class="page-title">Bienvenue !</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="main-card">
                     <h3 class="text-2xl font-bold mb-4">Présents Aujourd'hui</h3>
-                    <div id="team-today" class="space-y-3">
-                        </div>
+                    <div id="team-today" class="space-y-3"></div>
                 </div>
                 <div class="main-card flex flex-col justify-between">
                     <div>
                         <h3 class="text-2xl font-bold mb-4">Aperçu de la Semaine</h3>
-                        <div id="weekly-overview" class="space-y-4">
-                            </div>
+                        <div id="weekly-overview" class="space-y-4"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-6">
                          <button onclick="showPage('planning')" class="p-4 bg-purple-600/20 text-purple-300 rounded-lg font-semibold text-center hover:bg-purple-600/40 transition">Voir le Planning</button>
@@ -87,44 +86,46 @@
             </div>
         </div>
 
+        <!-- PAGE 2: PLANNING -->
         <div id="planning-page" class="page hidden">
             <h2 class="page-title">📅 Planning de la Semaine</h2>
             <div class="main-card">
-                <div id="planning-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-6">
-                    </div>
+                <div id="planning-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-6"></div>
             </div>
         </div>
 
+        <!-- PAGE 3: HEURES -->
         <div id="hours-page" class="page hidden">
             <h2 class="page-title">⏱️ Suivi des Heures Réelles</h2>
             <div class="main-card">
-                <div id="employees-hours-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
+                <div id="employees-hours-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
         </div>
     </main>
 
+    <!-- Bouton flottant -->
     <button onclick="openChatModal()" class="fixed bottom-24 right-6 size-16 bg-accent-blue rounded-full shadow-lg flex items-center justify-center text-white z-50 transform hover:scale-110 transition-transform md:bottom-6">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
     </button>
     
+    <!-- Navigation mobile -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-bg-surface h-20 border-t border-border-color flex justify-around items-center z-40">
         <button id="home-nav-mobile" class="nav-button active" onclick="showPage('home')">Accueil</button>
         <button id="planning-nav-mobile" class="nav-button" onclick="showPage('planning')">Planning</button>
         <button id="hours-nav-mobile" class="nav-button" onclick="showPage('hours')">Heures</button>
     </nav>
 
-
+    <!-- Modale de Chat IA -->
     <div id="chat-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
         <div class="fixed inset-0 bg-black/70" onclick="closeChatModal()"></div>
         <div class="main-card w-full max-w-2xl h-[70vh] flex flex-col z-10">
             <h3 class="text-2xl font-bold text-white mb-4">Assistant IA</h3>
             <div id="chat-messages" class="flex-1 overflow-y-auto p-2 space-y-4">
-                <div class="p-3 rounded-lg bg-slate-800 max-w-md">Bonjour ! Comment puis-je vous aider ?</div>
+                <div class="p-3 rounded-lg bg-slate-800 max-w-md">Bonjour ! Comment puis-je vous aider à gérer le restaurant ?</div>
             </div>
             <div class="mt-4 flex items-center gap-3">
                 <div class="relative flex-1">
-                    <input id="chat-input" type="text" class="w-full bg-slate-800 p-4 rounded-lg border-2 border-transparent focus:border-accent-blue focus:outline-none pr-24" placeholder="Envoyer un message...">
+                    <input id="chat-input" type="text" class="w-full bg-slate-800 p-4 rounded-lg border-2 border-transparent focus:border-accent-blue focus:outline-none pr-24" placeholder="Ex: crée le planning de la semaine">
                     <div class="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
                         <button title="Photo" class="size-10 rounded-full flex items-center justify-center text-text-secondary hover:bg-slate-700 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5L14.5 4Z"/><circle cx="12" cy="13" r="3"/></svg>
@@ -142,19 +143,8 @@
     </div>
 
 <script>
-    // --- CONFIGURATION ---
     const N8N_WEBHOOK_URL = 'https://morzinecap.app.n8n.cloud/webhook/23ed6cad-a469-446c-bccd-fe294d0f1839';
     
-    // --- ATTENTION : RISQUE DE SÉCURITÉ MAJEUR ---
-    // Le token Airtable ci-dessous ne doit JAMAIS être stocké dans le code de votre site web.
-    // N'importe quel visiteur peut le voir et obtenir un accès complet à votre base Airtable.
-    // Ce token doit être stocké de manière sécurisée dans les "Credentials" de votre workflow n8n.
-    // Je l'inclus ici uniquement parce que vous l'avez demandé explicitement pour des tests.
-    // (Note: Le workflow n8n fourni semble utiliser ses propres credentials, rendant ce token potentiellement inutilisé ici.)
-    const AIRTABLE_TOKEN = 'patYKX4FAPXVkvaG4.b63e717dd567c08cf287b75011f38f0e0b4c9a0535fe8f85ddcfbd3d8b907fe0';
-
-
-    // --- ÉLÉMENTS DU DOM ---
     const elements = {
         pages: document.querySelectorAll('.page'),
         navButtons: document.querySelectorAll('.nav-button'),
@@ -168,7 +158,6 @@
         chatSend: document.getElementById('chat-send'),
     };
     
-    // --- NAVIGATION ---
     function showPage(pageId) {
         elements.pages.forEach(p => p.classList.add('hidden'));
         document.getElementById(`${pageId}-page`).classList.remove('hidden');
@@ -178,33 +167,9 @@
         });
         window.scrollTo(0, 0);
     }
-    function openChatModal() { elements.chatModal.classList.remove('hidden'); elements.chatModal.classList.add('flex'); }
+
+    function openChatModal() { elements.chatModal.classList.remove('hidden'); elements.chatModal.classList.add('flex'); elements.chatInput.focus(); }
     function closeChatModal() { elements.chatModal.classList.add('hidden'); elements.chatModal.classList.remove('flex'); }
-    
-    // --- COMMUNICATION AVEC LE BACKEND (N8N) ---
-    async function fetchInitialData() {
-        try {
-            // Pour charger les données initiales, nous demandons au workflow de générer le planning.
-            // Le workflow est configuré pour renvoyer les données formatées pour ce dashboard.
-            const response = await fetch(N8N_WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: "génère le planning pour le dashboard" })
-            });
-            if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-            const responseData = await response.json();
-            
-            // Le workflow n8n renvoie un tableau. Les données sont dans le premier objet.
-            if (responseData && responseData[0] && responseData[0].json) {
-                return responseData[0].json;
-            } else {
-                throw new Error("Format de données inattendu de la part de n8n.");
-            }
-        } catch (error) {
-            console.warn("N8N Fetch Error: Could not load live data. Using fallback.", error);
-            return getSimulatedData(); // Utilise des données de secours en cas d'échec
-        }
-    }
     
     async function sendMessageToN8N(payload) {
         try {
@@ -216,17 +181,27 @@
             if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
             return await response.json();
         } catch (error) {
-            console.error("N8N Send Error:", error);
-            // Renvoie une réponse d'erreur structurée que le chat peut afficher
-            return { message: "Désolé, une erreur de communication est survenue." };
+            console.error("Erreur de communication avec n8n:", error);
+            return { error: true, message: "Désolé, une erreur de communication est survenue." };
         }
     }
 
-    // --- MISE À JOUR DE L'INTERFACE ---
+    function setLoadingState(message = "Chargement...") {
+        const loadingHTML = `<p class="text-text-secondary">${message}</p>`;
+        elements.teamToday.innerHTML = loadingHTML;
+        elements.weeklyOverview.innerHTML = loadingHTML;
+        elements.planningGrid.innerHTML = loadingHTML;
+        elements.employeesHoursGrid.innerHTML = loadingHTML;
+    }
+
     function updateUI(data) {
         if (!data || !data.employees || !data.planning || !data.dashboard) {
-            console.error("Les données pour mettre à jour l'interface sont invalides ou manquantes.", data);
-            elements.teamToday.innerHTML = `<p class="text-text-secondary text-red-400">Erreur: Impossible de charger les données des employés.</p>`;
+            console.error("Données invalides pour la mise à jour de l'UI.", data);
+            const errorHTML = `<p class="text-red-400">Erreur: Impossible de charger les données. Vérifiez la console.</p>`;
+            elements.teamToday.innerHTML = errorHTML;
+            elements.weeklyOverview.innerHTML = errorHTML;
+            elements.planningGrid.innerHTML = errorHTML;
+            elements.employeesHoursGrid.innerHTML = errorHTML;
             return;
         }
         const { employees, planning, dashboard } = data;
@@ -235,18 +210,22 @@
             <div class="flex items-center justify-between bg-slate-800 p-3 rounded-lg">
                 <p class="font-bold">${emp.nom} <span class="text-sm font-normal text-text-secondary">(${emp.role})</span></p>
                 <div class="flex items-center gap-2 text-green-400"><span class="size-2 bg-accent-green rounded-full"></span><span class="text-sm font-semibold">Présent</span></div>
-            </div>`).join('') || `<p class="text-text-secondary">Personne n'est indiqué comme présent pour le moment.</p>`;
+            </div>`).join('') || `<p class="text-text-secondary">Personne n'est indiqué comme présent.</p>`;
         
         elements.weeklyOverview.innerHTML = `
             <div class="flex items-center justify-between text-lg"><span class="text-text-secondary">Total heures prévues :</span><span class="font-bold">${dashboard.totalHeures}h</span></div>
             <div class="flex items-center justify-between text-lg"><span class="text-text-secondary">Total heures supp. :</span><span class="font-bold text-orange-400">${dashboard.totalHeuresSupp}h</span></div>`;
         
         const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-        elements.planningGrid.innerHTML = days.map(day => `
-            <div class="bg-slate-800 p-4 rounded-xl"><h4 class="font-bold text-center text-lg mb-3">${day}</h4><div class="space-y-2">
-                <div class="bg-slate-900 p-3 rounded-md"><p class="font-semibold text-purple-300">Midi</p><p class="text-sm text-text-secondary">${planning.filter(p => p.day === day && p.service === 'Midi').flatMap(p => p.employes).join(', ') || 'Fermé'}</p></div>
-                <div class="bg-slate-900 p-3 rounded-md"><p class="font-semibold text-purple-300">Soir</p><p class="text-sm text-text-secondary">${planning.filter(p => p.day === day && p.service === 'Soir').flatMap(p => p.employes).join(', ') || 'Fermé'}</p></div>
-            </div></div>`).join('');
+        elements.planningGrid.innerHTML = days.map(day => {
+            const dayFormatted = day.charAt(0).toUpperCase() + day.slice(1);
+            const midiStaff = planning.filter(p => p.day.toLowerCase() === day.toLowerCase() && p.service === 'Midi').flatMap(p => p.employes).join(', ') || 'Fermé';
+            const soirStaff = planning.filter(p => p.day.toLowerCase() === day.toLowerCase() && p.service === 'Soir').flatMap(p => p.employes).join(', ') || 'Fermé';
+            return `<div class="bg-slate-800 p-4 rounded-xl"><h4 class="font-bold text-center text-lg mb-3">${dayFormatted}</h4><div class="space-y-2">
+                <div class="bg-slate-900 p-3 rounded-md"><p class="font-semibold text-purple-300">Midi</p><p class="text-sm text-text-secondary">${midiStaff}</p></div>
+                <div class="bg-slate-900 p-3 rounded-md"><p class="font-semibold text-purple-300">Soir</p><p class="text-sm text-text-secondary">${soirStaff}</p></div>
+            </div></div>`
+        }).join('');
 
         elements.employeesHoursGrid.innerHTML = employees.map(emp => {
             const percentage = emp.heuresContrat > 0 ? (emp.heuresSemaine / emp.heuresContrat) * 100 : 0;
@@ -254,7 +233,6 @@
         }).join('');
     }
     
-    // --- LOGIQUE DU CHAT ---
     function appendChatMessage(message, sender) {
         const alignClass = sender === 'user' ? 'justify-end' : 'justify-start';
         const colorClass = sender === 'user' ? 'bg-blue-600' : 'bg-slate-800';
@@ -262,24 +240,32 @@
         elements.chatMessages.innerHTML += html;
         elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
     }
+
     function showTypingIndicator() {
         const html = `<div id="typing-indicator" class="flex justify-start"><div class="p-3 rounded-lg bg-slate-800"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
         elements.chatMessages.innerHTML += html;
         elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
     }
+
     function hideTypingIndicator() {
         const indicator = document.getElementById('typing-indicator');
         if(indicator) indicator.remove();
     }
 
-    // --- DONNÉES SIMULÉES (FALLBACK) ---
-    function getSimulatedData() { return { employees: [{ id: '1', nom: 'Vanessa', role: 'Serveur', heuresContrat: 35, heuresSemaine: 39, heuresSupp: 4, present: true },{ id: '2', nom: 'Sarah', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 42, heuresSupp: 7, present: true },{ id: '3', nom: 'Oscar', role: 'Plongeur', heuresContrat: 35, heuresSemaine: 38, heuresSupp: 3, present: false },{ id: '4', nom: 'Louis', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 35, heuresSupp: 0, present: true },{ id: '5', nom: 'Alexis', role: 'Serveur', heuresContrat: 35, heuresSemaine: 41, heuresSupp: 6, present: false }], planning: [{ day: 'Lundi', service: 'Soir', employes: ['Vanessa', 'Sarah', 'Oscar', 'Alexis']},{ day: 'Mardi', service: 'Midi', employes: ['Louis', 'Alexis']},{ day: 'Mardi', service: 'Soir', employes: ['Vanessa', 'Louis', 'Oscar', 'Sarah']}], dashboard: { totalHeures: 195, totalHeuresSupp: 20 } }; }
+    async function loadInitialData() {
+        setLoadingState("Connexion au robot n8n...");
+        const response = await sendMessageToN8N({ text: "génère le planning pour le dashboard" });
+        if (response && !response.error && response[0]?.json?.employees) {
+            updateUI(response[0].json);
+        } else {
+             console.error("Réponse invalide du workflow pour les données initiales :", response);
+             updateUI(null); // Déclenche l'affichage d'erreur
+        }
+    }
 
-    // --- INITIALISATION ---
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', () => {
         showPage('home');
-        const appData = await fetchInitialData();
-        updateUI(appData);
+        loadInitialData();
         
         const handleSend = async () => {
             const input = elements.chatInput;
@@ -297,29 +283,22 @@
             let responseMessage = "Action traitée avec succès.";
             let shouldRefresh = true;
 
-            // Interprète la réponse de n8n
-            if (iaResponse && Array.isArray(iaResponse) && iaResponse[0]?.json?.employees) {
-                // Si la réponse contient les données complètes du dashboard (cas d'une regénération du planning)
+            if (iaResponse.error) {
+                responseMessage = iaResponse.message;
+                shouldRefresh = false;
+            } else if (iaResponse[0]?.json?.employees) {
                 responseMessage = "Le planning a été mis à jour.";
                 updateUI(iaResponse[0].json);
-                shouldRefresh = false; // Pas besoin de re-fetcher, on a déjà les nouvelles données
-            } else if (iaResponse && iaResponse.message) {
-                // Cas d'une réponse simple avec un champ "message" (ex: plat du jour)
-                responseMessage = iaResponse.message;
-            } else if (iaResponse && Array.isArray(iaResponse) && iaResponse[0]?.json?.message) {
-                 // Cas d'une réponse simple encapsulée (ex: ajout d'heures)
+                shouldRefresh = false; 
+            } else if (iaResponse[0]?.json?.message) {
                 responseMessage = iaResponse[0].json.message;
-            } else if (typeof iaResponse === 'string') {
-                // Cas d'une réponse texte brute
-                responseMessage = iaResponse;
             }
-            
+
             appendChatMessage(responseMessage, 'ia');
 
-            // Rafraîchit les données du dashboard si une action a pu les modifier
             if (shouldRefresh) {
-                const updatedData = await fetchInitialData();
-                updateUI(updatedData);
+                setLoadingState("Mise à jour des données...");
+                await loadInitialData();
             }
         };
 

@@ -92,7 +92,7 @@
         /* Grille du tableau de bord */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: 450px 1fr;
             gap: 2rem;
         }
 
@@ -133,29 +133,6 @@
             font-family: var(--font-heading);
         }
 
-        /* Cartes de statistiques */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-
         /* Carte de gestion d'équipe */
         .team-list {
             display: flex;
@@ -187,6 +164,7 @@
             justify-content: center;
             font-weight: 600;
             color: white;
+            flex-shrink: 0;
         }
         .member-details h4 {
             font-size: 0.95rem;
@@ -202,63 +180,82 @@
             border-radius: 50%;
             border: 2px solid var(--bg-color);
             box-shadow: 0 0 5px currentColor;
+            flex-shrink: 0;
         }
         .status-dot.present { color: var(--success-color); background: var(--success-color); }
         .status-dot.absent { color: var(--danger-color); background: var(--danger-color); }
 
-        /* Carte du planning */
+        .member-hours {
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.25rem 0.6rem;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+        .member-hours.overtime {
+            color: var(--warning-color);
+            background-color: rgba(255, 193, 7, 0.1);
+        }
+
+
+        /* Carte du planning - Mise à jour */
         .planning-list {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.5rem;
         }
-        .planning-day {
-            border-left: 3px solid var(--primary-accent);
-            padding-left: 1.5rem;
-        }
+
         .day-header {
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            font-family: var(--font-heading);
+            color: var(--text-primary);
+            font-size: 1.1rem;
         }
-        .services {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+        .day-services-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
         }
-        .service-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 500;
+        .service-slot {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        .service-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-size: 0.9rem;
         }
-        .service-badge.midi {
-            background-color: rgba(255, 193, 7, 0.1);
+        .service-title.midi {
             color: var(--warning-color);
         }
-        .service-badge.soir {
-            background-color: rgba(138, 43, 226, 0.1);
+        .service-title.soir {
             color: var(--primary-accent);
         }
-        .team-preview {
+        .service-team {
             display: flex;
-            margin-left: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
-        .team-preview-avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 2px solid var(--card-bg);
-            margin-left: -8px;
-            background: var(--text-secondary);
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
+        .employee-tag {
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
         }
+        .no-service {
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.8rem;
+        }
+
 
         /* Bouton Flottant pour l'IA */
         .fab-ai {
@@ -413,6 +410,12 @@
         }
 
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 1rem;
@@ -421,6 +424,9 @@
                 font-size: 1.5rem;
             }
             .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .day-services-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -439,34 +445,8 @@
         </header>
 
         <main class="dashboard-grid">
-            <!-- Carte #1: Aperçu Rapide -->
+            <!-- Carte #1: Gestion de l'Équipe -->
             <div class="card" style="animation-delay: 0.1s;">
-                <div class="card-header">
-                    <span class="card-icon">⚡️</span>
-                    <h3 class="card-title">Aperçu Rapide</h3>
-                </div>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="statTotalHeures">0h</div>
-                        <div class="stat-label">Heures Semaine</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="statHeuresSupp">0h</div>
-                        <div class="stat-label">Heures Supp.</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="statCout">0€</div>
-                        <div class="stat-label">Coût Salarial</div>
-                    </div>
-                     <div class="stat-item">
-                        <div class="stat-value" id="statPresence">0%</div>
-                        <div class="stat-label">Présence</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Carte #2: Gestion de l'Équipe -->
-            <div class="card" style="animation-delay: 0.2s;">
                 <div class="card-header">
                     <span class="card-icon">👥</span>
                     <h3 class="card-title">Gestion de l'Équipe</h3>
@@ -476,8 +456,8 @@
                 </div>
             </div>
 
-            <!-- Carte #3: Planning de la Semaine -->
-            <div class="card" style="animation-delay: 0.3s; grid-column: span 1 / span 2;">
+            <!-- Carte #2: Planning de la Semaine -->
+            <div class="card" style="animation-delay: 0.2s;">
                  <div class="card-header">
                     <span class="card-icon">📅</span>
                     <h3 class="card-title">Planning de la Semaine</h3>
@@ -534,7 +514,14 @@
                 { day: 'Mardi', service: 'Midi', employes: ['Louis', 'Vanessa'] },
                 { day: 'Mardi', service: 'Soir', employes: ['Sarah', 'Oscar', 'Alexis'] },
                 { day: 'Mercredi', service: 'Midi', employes: ['Sarah', 'Vanessa'] },
-                { day: 'Mercredi', service: 'Soir', employes: ['Louis', 'Oscar', 'Alexis'] },
+                { day: 'Mercredi', service: 'Soir', employes: ['Louis', 'Alexis'] },
+                { day: 'Jeudi', service: 'Midi', employes: ['Louis', 'Vanessa'] },
+                { day: 'Jeudi', service: 'Soir', employes: ['Sarah', 'Oscar', 'Alexis'] },
+                { day: 'Vendredi', service: 'Midi', employes: ['Sarah', 'Louis', 'Vanessa'] },
+                { day: 'Vendredi', service: 'Soir', employes: ['Sarah', 'Louis', 'Vanessa', 'Oscar', 'Alexis'] },
+                { day: 'Samedi', service: 'Midi', employes: ['Sarah', 'Louis'] },
+                { day: 'Samedi', service: 'Soir', employes: ['Sarah', 'Louis', 'Vanessa', 'Oscar', 'Alexis'] },
+                { day: 'Dimanche', service: 'Soir', employes: ['Vanessa', 'Oscar'] }, // Midi repos
             ];
 
             // --- ÉLÉMENTS DU DOM ---
@@ -553,6 +540,7 @@
             function displayTeam() {
                 teamListEl.innerHTML = '';
                 employees.forEach(emp => {
+                    const isOvertime = emp.heuresSemaine > emp.heuresContrat;
                     const memberEl = document.createElement('div');
                     memberEl.className = 'team-member';
                     memberEl.innerHTML = `
@@ -563,7 +551,10 @@
                                 <p>${emp.role}</p>
                             </div>
                         </div>
-                        <div class="status-dot ${emp.present ? 'present' : 'absent'}" title="${emp.present ? 'Présent' : 'Absent'}"></div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                           <div class="member-hours ${isOvertime ? 'overtime' : ''}">${emp.heuresSemaine}h / ${emp.heuresContrat}h</div>
+                           <div class="status-dot ${emp.present ? 'present' : 'absent'}" title="${emp.present ? 'Présent' : 'Absent'}"></div>
+                        </div>
                     `;
                     teamListEl.appendChild(memberEl);
                 });
@@ -573,47 +564,43 @@
             function displayPlanning() {
                 planningListEl.innerHTML = '';
                 const groupedPlanning = planning.reduce((acc, p) => {
-                    acc[p.day] = acc[p.day] || [];
-                    acc[p.day].push(p);
+                    acc[p.day] = acc[p.day] || {};
+                    acc[p.day][p.service] = p.employes;
                     return acc;
                 }, {});
 
-                for (const day in groupedPlanning) {
-                    const dayEl = document.createElement('div');
-                    dayEl.className = 'planning-day';
-                    
-                    let servicesHTML = groupedPlanning[day].map(service => `
-                        <div class="service-badge ${service.service.toLowerCase()}">
-                            <span>${service.service}</span>
-                            <div class="team-preview">
-                                ${service.employes.map(e => `<div class="team-preview-avatar" style="background-color: ${getColorForString(e)}" title="${e}">${e.substring(0,1)}</div>`).join('')}
+                const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+
+                daysOfWeek.forEach(day => {
+                    if (groupedPlanning[day]) {
+                        const dayData = groupedPlanning[day];
+                        const dayEl = document.createElement('div');
+                        dayEl.className = 'planning-day';
+
+                        const midiTeam = dayData['Midi']
+                            ? dayData['Midi'].map(e => `<span class="employee-tag">${e}</span>`).join('')
+                            : '<span class="no-service">Repos</span>';
+                        
+                        const soirTeam = dayData['Soir']
+                            ? dayData['Soir'].map(e => `<span class="employee-tag">${e}</span>`).join('')
+                            : '<span class="no-service">Repos</span>';
+
+                        dayEl.innerHTML = `
+                            <div class="day-header">${day}</div>
+                            <div class="day-services-grid">
+                                <div class="service-slot">
+                                    <div class="service-title midi">🌅 Midi</div>
+                                    <div class="service-team">${midiTeam}</div>
+                                </div>
+                                <div class="service-slot">
+                                    <div class="service-title soir">🌙 Soir</div>
+                                    <div class="service-team">${soirTeam}</div>
+                                </div>
                             </div>
-                        </div>
-                    `).join('');
-
-                    dayEl.innerHTML = `
-                        <div class="day-header">${day}</div>
-                        <div class="services">${servicesHTML}</div>
-                    `;
-                    planningListEl.appendChild(dayEl);
-                }
-            }
-            
-            // Met à jour les statistiques
-            function updateStats() {
-                const totalHeures = employees.reduce((sum, emp) => sum + emp.heuresSemaine, 0);
-                const totalHeuresSupp = employees.reduce((sum, emp) => sum + Math.max(0, emp.heuresSemaine - emp.heuresContrat), 0);
-                const coutSalarial = employees.reduce((sum, emp) => {
-                    const heuresNormales = Math.min(emp.heuresSemaine, emp.heuresContrat);
-                    const heuresSupp = Math.max(0, emp.heuresSemaine - emp.heuresContrat);
-                    return sum + (heuresNormales * 15) + (heuresSupp * 15 * 1.25); // Simulation de coût
-                }, 0);
-                const presence = (employees.filter(e => e.present).length / employees.length) * 100;
-
-                document.getElementById('statTotalHeures').textContent = `${totalHeures}h`;
-                document.getElementById('statHeuresSupp').textContent = `${totalHeuresSupp}h`;
-                document.getElementById('statCout').textContent = `${Math.round(coutSalarial)}€`;
-                document.getElementById('statPresence').textContent = `${Math.round(presence)}%`;
+                        `;
+                        planningListEl.appendChild(dayEl);
+                    }
+                });
             }
 
             // --- LOGIQUE DU CHAT ---
@@ -664,8 +651,8 @@
             // --- INITIALISATION ---
             displayTeam();
             displayPlanning();
-            updateStats();
         });
     </script>
 </body>
 </html>
+

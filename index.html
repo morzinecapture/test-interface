@@ -503,7 +503,7 @@
 
             // --- DONNÉES DE SIMULATION ---
             // Remplacez ceci par vos données réelles (ex: fetch depuis une API)
-            const employees = [
+            let employees = [
                 { id: 'sarah', nom: 'Sarah', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 40, present: true },
                 { id: 'louis', nom: 'Louis', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 38, present: true },
                 { id: 'vanessa', nom: 'Vanessa', role: 'Serveur', heuresContrat: 30, heuresSemaine: 32, present: true },
@@ -511,7 +511,7 @@
                 { id: 'alexis', nom: 'Alexis', role: 'Plongeur', heuresContrat: 25, heuresSemaine: 25, present: true }
             ];
 
-            const planning = [
+            let planning = [
                 { day: 'Lundi', service: 'Midi', employes: ['Sarah', 'Vanessa'] },
                 { day: 'Lundi', service: 'Soir', employes: ['Louis', 'Oscar', 'Alexis'] },
                 { day: 'Mardi', service: 'Midi', employes: ['Louis', 'Vanessa'] },
@@ -629,7 +629,7 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ text: messageText })
+                        body: JSON.stringify({ chatInput: messageText }) // Utiliser chatInput comme dans votre n8n
                     });
                     
                     removeTypingIndicator();
@@ -639,11 +639,21 @@
 
                     const data = await response.json();
                     
-                    // L'image est retournée dans une propriété 'imageUrl'
-                    if (data.imageUrl) {
+                    // Gérer la réponse de n8n
+                    if (data.planning) {
+                        // Mettre à jour les données
+                        planning = data.planning;
+                        if (data.employees) {
+                            employees = data.employees;
+                            displayTeam();
+                        }
+                        // Rafraîchir l'affichage
+                        displayPlanning();
+                        addMessageToChat("Le planning a été mis à jour avec succès !", 'bot');
+
+                    } else if (data.imageUrl) {
                         addMessageToChat(`<img src="${data.imageUrl}" alt="Image générée" style="max-width:100%; border-radius: 12px;">`, 'bot');
                     } else {
-                         // Adaptez la clé selon la réponse de votre webhook (ex: data.message, data.text)
                         const botResponse = data.message || data.text || "J'ai bien reçu votre message.";
                         addMessageToChat(botResponse, 'bot');
                     }
@@ -702,4 +712,5 @@
     </script>
 </body>
 </html>
+
 

@@ -3,8 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Restaurant - Gestion Complète</title>
+    <title>AURA Dashboard - Restaurant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #10101a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --primary-accent: #8A2BE2; /* Violet Bleu */
+            --secondary-accent: #FF69B4; /* Rose Vif */
+            --text-primary: #f0f0f8;
+            --text-secondary: #a0a0b8;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --font-body: 'Poppins', sans-serif;
+            --font-heading: 'Lora', serif;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,852 +30,642 @@
         }
 
         body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 2rem;
             min-height: 100vh;
-            color: #2c3e50;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(138, 43, 226, 0.2), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(255, 105, 180, 0.15), transparent 40%),
+                radial-gradient(circle at 50% 90%, rgba(50, 205, 50, 0.1), transparent 40%);
+            background-attachment: fixed;
+            overflow-x: hidden;
         }
 
+        /* Conteneur principal */
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto 1fr;
-            gap: 20px;
-            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
 
+        /* En-tête */
         .header {
-            grid-column: 1 / -1;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 20px 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeInDown 0.8s ease-out;
         }
 
         .header h1 {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            background: linear-gradient(45deg, var(--primary-accent), var(--secondary-accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 10px;
         }
 
-        .status-bar {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .status-item {
+        .user-profile {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
+            gap: 1rem;
+            background: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
         }
 
-        .panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            overflow-y: auto;
-        }
-
-        .panel h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 24px;
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(45deg, var(--primary-accent), var(--secondary-accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: 600;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
         }
 
-        /* === SECTION CHAT === */
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 0;
-            margin-bottom: 20px;
-            max-height: 400px;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 12px;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .message.user {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            margin-left: 20%;
-        }
-
-        .message.assistant {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            margin-right: 20%;
-        }
-
-        .chat-input-area {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .input-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .voice-controls {
-            display: flex;
-            gap: 10px;
-        }
-
-        .recording {
-            background: #dc3545 !important;
-            animation: pulse 1.5s infinite;
-        }
-
-        /* === SECTION PLANNING === */
-        .planning-grid {
+        /* Grille du tableau de bord */
+        .dashboard-grid {
             display: grid;
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
         }
 
-        .day-card {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .day-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .day-header {
-            font-size: 18px;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 8px;
-        }
-
-        .service {
-            margin-bottom: 15px;
-        }
-
-        .service h4 {
-            color: #667eea;
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-
-        .employee-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .employee-tag {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 4px 12px;
+        /* Style de carte de base */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
         }
 
-        /* === SECTION HEURES RÉELLES === */
-        .hours-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
         }
 
-        .hours-table th,
-        .hours-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
         }
 
-        .hours-table th {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
             font-weight: 600;
+            font-family: var(--font-heading);
         }
 
-        .hours-table tr:hover {
-            background: #f8f9fa;
+        /* Cartes de statistiques */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
         }
 
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
             text-transform: uppercase;
         }
 
-        .status-present {
-            background: #d4edda;
-            color: #155724;
+        /* Carte de gestion d'équipe */
+        .team-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
-
-        .status-absent {
-            background: #f8d7da;
-            color: #721c24;
+        .team-member {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border-radius: 12px;
+            transition: background-color 0.2s ease;
         }
-
-        .status-break {
-            background: #fff3cd;
-            color: #856404;
+        .team-member:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
-
-        /* === ANIMATIONS === */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+        .member-avatar {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* === RESPONSIVE === */
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-                padding: 10px;
-                height: auto;
-            }
-            
-            .input-row {
-                flex-direction: column;
-            }
-            
-            .voice-controls {
-                justify-content: center;
-            }
-        }
-
-        /* === STATUS INDICATORS === */
-        .connection-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: 600;
+            color: white;
+        }
+        .member-details h4 {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .member-details p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-color);
+            box-shadow: 0 0 5px currentColor;
+        }
+        .status-dot.present { color: var(--success-color); background: var(--success-color); }
+        .status-dot.absent { color: var(--danger-color); background: var(--danger-color); }
+
+        /* Carte du planning */
+        .planning-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .planning-day {
+            border-left: 3px solid var(--primary-accent);
+            padding-left: 1.5rem;
+        }
+        .day-header {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .services {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .service-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .service-badge.midi {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+        }
+        .service-badge.soir {
+            background-color: rgba(138, 43, 226, 0.1);
+            color: var(--primary-accent);
+        }
+        .team-preview {
+            display: flex;
+            margin-left: 0.5rem;
+        }
+        .team-preview-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--card-bg);
+            margin-left: -8px;
+            background: var(--text-secondary);
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Bouton Flottant pour l'IA */
+        .fab-ai {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, var(--primary-accent), var(--secondary-accent));
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+            transition: all 0.3s ease;
             z-index: 1000;
         }
-
-        .connection-online {
-            background: #d4edda;
-            color: #155724;
+        .fab-ai:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 12px 30px rgba(138, 43, 226, 0.5);
         }
 
-        .connection-offline {
-            background: #f8d7da;
-            color: #721c24;
+        /* Modal de Chat IA */
+        .chat-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .chat-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .chat-modal.active .chat-container {
+            transform: scale(1);
+        }
+        .chat-header {
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-header h3 { font-size: 1.2rem; }
+        .close-chat {
+            background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .message-bubble {
+            max-width: 80%;
+            padding: 0.8rem 1.2rem;
+            border-radius: 18px;
+            line-height: 1.5;
+        }
+        .message.user .message-bubble {
+            background: linear-gradient(45deg, var(--primary-accent), var(--secondary-accent));
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .message.bot .message-bubble {
+            background: var(--card-bg);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-input-area {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .chat-input-wrapper {
+            display: flex;
+            background: var(--card-bg);
+            border-radius: 50px;
+            padding: 0.5rem;
+        }
+        #chatInput {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            padding: 0 1rem;
+        }
+        #sendChat {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary-accent);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
         }
 
-        .hidden {
-            display: none;
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        #imagePreview {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 8px;
-            margin: 10px 0;
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="connection-status connection-online" id="connectionStatus">
-        🟢 En ligne
-    </div>
 
     <div class="container">
-        <div class="header">
-            <h1>🏪 Dashboard Restaurant</h1>
-            <div class="status-bar">
-                <div class="status-item">
-                    <span>📅</span>
-                    <span id="currentDate"></span>
-                </div>
-                <div class="status-item">
-                    <span>👥</span>
-                    <span id="activeEmployees">0</span> employés actifs
-                </div>
-                <div class="status-item">
-                    <span>⏰</span>
-                    <span>Dernière MAJ: <span id="lastUpdate">--:--</span></span>
-                </div>
+        <!-- En-tête -->
+        <header class="header">
+            <h1>AURA Dashboard</h1>
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
+                <span>Admin</span>
             </div>
-        </div>
+        </header>
 
-        <div class="panel">
-            <h2>💬 Assistant IA</h2>
-            <div class="chat-container">
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message assistant">
-                        <strong>Assistant:</strong> Bonjour ! Je peux vous aider avec le planning, les plats du jour, ou les heures de travail. Que souhaitez-vous faire ?
+        <main class="dashboard-grid">
+            <!-- Carte #1: Aperçu Rapide -->
+            <div class="card" style="animation-delay: 0.1s;">
+                <div class="card-header">
+                    <span class="card-icon">⚡️</span>
+                    <h3 class="card-title">Aperçu Rapide</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTotalHeures">0h</div>
+                        <div class="stat-label">Heures Semaine</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statHeuresSupp">0h</div>
+                        <div class="stat-label">Heures Supp.</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statCout">0€</div>
+                        <div class="stat-label">Coût Salarial</div>
+                    </div>
+                     <div class="stat-item">
+                        <div class="stat-value" id="statPresence">0%</div>
+                        <div class="stat-label">Présence</div>
                     </div>
                 </div>
-                
-                <div class="chat-input-area">
-                    <div class="input-row">
-                        <input type="text" 
-                               class="chat-input" 
-                               id="chatInput" 
-                               placeholder="Tapez votre message..."
-                               onkeypress="handleKeyPress(event)">
-                        <button class="btn btn-primary" onclick="sendMessage()">
-                            📤 Envoyer
-                        </button>
-                    </div>
-                    
-                    <div class="voice-controls">
-                        <button class="btn btn-secondary" id="recordBtn" onclick="toggleRecording()">
-                            🎤 Vocal
-                        </button>
-                        <input type="file" 
-                               id="imageInput" 
-                               accept="image/*" 
-                               style="display: none;" 
-                               onchange="handleImageUpload(event)">
-                        <button class="btn btn-secondary" onclick="document.getElementById('imageInput').click()">
-                            📷 Photo
-                        </button>
-                    </div>
-                    
-                    <div id="imagePreview" class="hidden"></div>
+            </div>
+
+            <!-- Carte #2: Gestion de l'Équipe -->
+            <div class="card" style="animation-delay: 0.2s;">
+                <div class="card-header">
+                    <span class="card-icon">👥</span>
+                    <h3 class="card-title">Gestion de l'Équipe</h3>
+                </div>
+                <div class="team-list" id="teamList">
+                    <!-- Les membres de l'équipe seront insérés ici par JS -->
                 </div>
             </div>
-        </div>
 
-        <div class="panel">
-            <h2>📅 Planning Équipe</h2>
-            <div class="planning-grid" id="planningGrid">
-                <div class="day-card">
-                    <div class="day-header">Chargement du planning...</div>
-                    <div class="loading"></div>
+            <!-- Carte #3: Planning de la Semaine -->
+            <div class="card" style="animation-delay: 0.3s; grid-column: span 1 / span 2;">
+                 <div class="card-header">
+                    <span class="card-icon">📅</span>
+                    <h3 class="card-title">Planning de la Semaine</h3>
+                </div>
+                <div class="planning-list" id="planningList">
+                   <!-- Le planning sera inséré ici par JS -->
                 </div>
             </div>
-        </div>
+        </main>
+    </div>
 
-        <div class="panel">
-            <h2>⏰ Heures Réelles</h2>
-            <table class="hours-table" id="hoursTable">
-                <thead>
-                    <tr>
-                        <th>👤 Employé</th>
-                        <th>🏢 Rôle</th>
-                        <th>📍 Statut</th>
-                        <th>⏰ Heures Aujour.</th>
-                        <th>📊 Total Semaine</th>
-                    </tr>
-                </thead>
-                <tbody id="hoursTableBody">
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 40px;">
-                            <div class="loading"></div>
-                            Chargement des données...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Bouton Flottant IA -->
+    <button class="fab-ai" id="fabAI">🤖</button>
+
+    <!-- Modal de Chat IA -->
+    <div class="chat-modal" id="chatModal">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h3>Assistant IA</h3>
+                <button class="close-chat" id="closeChat">&times;</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-bubble">
+                        Bonjour ! Comment puis-je vous aider à optimiser votre restaurant aujourd'hui ?
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <div class="chat-input-wrapper">
+                    <input type="text" id="chatInput" placeholder="Envoyer un message...">
+                    <button id="sendChat">➤</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // === CONFIGURATION N8N ===
-        const N8N_CONFIG = {
-            // Remplacez par vos URLs webhook réelles
-            WEBHOOK_URL: 'https://morzinecap.app.n8n.cloud/webhook/23ed6cad-a469-446c-bccd-fe294d0f1839', // URL du webhook principal
-            CHAT_WEBHOOK: 'YOUR_CHAT_WEBHOOK_URL', // Pour les messages chat
-            VOICE_WEBHOOK: 'YOUR_VOICE_WEBHOOK_URL', // Pour l'audio
-            IMAGE_WEBHOOK: 'YOUR_IMAGE_WEBHOOK_URL', // Pour les images
-            PLANNING_ENDPOINT: 'YOUR_PLANNING_API_URL', // Pour récupérer le planning
-            HOURS_ENDPOINT: 'YOUR_HOURS_API_URL' // Pour récupérer les heures
-        };
+        document.addEventListener('DOMContentLoaded', () => {
 
-        // === VARIABLES GLOBALES ===
-        let isRecording = false;
-        let mediaRecorder = null;
-        let audioChunks = [];
+            // --- DONNÉES DE SIMULATION ---
+            // Remplacez ceci par vos données réelles (ex: fetch depuis une API)
+            const employees = [
+                { id: 'sarah', nom: 'Sarah', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 40, present: true },
+                { id: 'louis', nom: 'Louis', role: 'Cuisine', heuresContrat: 35, heuresSemaine: 38, present: true },
+                { id: 'vanessa', nom: 'Vanessa', role: 'Serveur', heuresContrat: 30, heuresSemaine: 32, present: true },
+                { id: 'oscar', nom: 'Oscar', role: 'Serveur', heuresContrat: 30, heuresSemaine: 28, present: false },
+                { id: 'alexis', nom: 'Alexis', role: 'Plongeur', heuresContrat: 25, heuresSemaine: 25, present: true }
+            ];
 
-        // === INITIALISATION ===
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCurrentDate();
-            loadInitialData();
-            
-            // Mise à jour automatique toutes les 30 secondes
-            setInterval(loadInitialData, 30000);
-            
-            // Mise à jour de l'heure toutes les secondes
-            setInterval(updateCurrentDate, 1000);
-        });
+            const planning = [
+                { day: 'Lundi', service: 'Midi', employes: ['Sarah', 'Vanessa'] },
+                { day: 'Lundi', service: 'Soir', employes: ['Louis', 'Oscar', 'Alexis'] },
+                { day: 'Mardi', service: 'Midi', employes: ['Louis', 'Vanessa'] },
+                { day: 'Mardi', service: 'Soir', employes: ['Sarah', 'Oscar', 'Alexis'] },
+                { day: 'Mercredi', service: 'Midi', employes: ['Sarah', 'Vanessa'] },
+                { day: 'Mercredi', service: 'Soir', employes: ['Louis', 'Oscar', 'Alexis'] },
+            ];
 
-        // === FONCTIONS CHAT ===
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
+            // --- ÉLÉMENTS DU DOM ---
+            const teamListEl = document.getElementById('teamList');
+            const planningListEl = document.getElementById('planningList');
+            const fabAI = document.getElementById('fabAI');
+            const chatModal = document.getElementById('chatModal');
+            const closeChat = document.getElementById('closeChat');
+            const chatInput = document.getElementById('chatInput');
+            const sendChatBtn = document.getElementById('sendChat');
+            const chatMessagesEl = document.getElementById('chatMessages');
 
-        async function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            // Afficher le message utilisateur
-            addMessage(message, 'user');
-            input.value = '';
-            
-            try {
-                showTyping();
-                
-                const response = await fetch(N8N_CONFIG.CHAT_WEBHOOK || N8N_CONFIG.WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        text: message,
-                        type: 'chat',
-                        timestamp: new Date().toISOString()
-                    })
-                });
-                
-                const result = await response.json();
-                hideTyping();
-                
-                // Afficher la réponse
-                if (result.success) {
-                    addMessage(result.message || 'Demande traitée avec succès !', 'assistant');
-                    
-                    // Recharger les données si nécessaire
-                    if (result.refresh) {
-                        loadInitialData();
-                    }
-                } else {
-                    addMessage('Désolé, une erreur est survenue. Veuillez réessayer.', 'assistant');
-                }
-                
-            } catch (error) {
-                console.error('Erreur:', error);
-                hideTyping();
-                addMessage('Erreur de connexion. Vérifiez votre connexion internet.', 'assistant');
-                updateConnectionStatus(false);
-            }
-        }
+            // --- FONCTIONS D'AFFICHAGE ---
 
-        function addMessage(text, sender) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            messageDiv.innerHTML = `<strong>${sender === 'user' ? 'Vous' : 'Assistant'}:</strong> ${text}`;
-            
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function showTyping() {
-            const messagesContainer = document.getElementById('chatMessages');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message assistant';
-            typingDiv.id = 'typing';
-            typingDiv.innerHTML = '<strong>Assistant:</strong> <div class="loading"></div>';
-            messagesContainer.appendChild(typingDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function hideTyping() {
-            const typingElement = document.getElementById('typing');
-            if (typingElement) {
-                typingElement.remove();
-            }
-        }
-
-        // === FONCTIONS AUDIO ===
-        async function toggleRecording() {
-            const recordBtn = document.getElementById('recordBtn');
-            
-            if (!isRecording) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    
-                    mediaRecorder.ondataavailable = (event) => {
-                        audioChunks.push(event.data);
-                    };
-                    
-                    mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        await sendAudioMessage(audioBlob);
-                    };
-                    
-                    mediaRecorder.start();
-                    isRecording = true;
-                    recordBtn.innerHTML = '⏹️ Arrêter';
-                    recordBtn.classList.add('recording');
-                    
-                } catch (error) {
-                    console.error('Erreur microphone:', error);
-                    addMessage('Impossible d\'accéder au microphone.', 'assistant');
-                }
-            } else {
-                mediaRecorder.stop();
-                mediaRecorder.stream.getTracks().forEach(track => track.stop());
-                isRecording = false;
-                recordBtn.innerHTML = '🎤 Vocal';
-                recordBtn.classList.remove('recording');
-            }
-        }
-
-        async function sendAudioMessage(audioBlob) {
-            try {
-                showTyping();
-                
-                const reader = new FileReader();
-                reader.onloadend = async () => {
-                    const base64Audio = reader.result.split(',')[1];
-                    
-                    const response = await fetch(N8N_CONFIG.VOICE_WEBHOOK || N8N_CONFIG.WEBHOOK_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            audio: base64Audio,
-                            type: 'voice',
-                            timestamp: new Date().toISOString()
-                        })
-                    });
-                    
-                    const result = await response.json();
-                    hideTyping();
-                    
-                    addMessage('🎤 Message vocal envoyé', 'user');
-                    
-                    if (result.success) {
-                        addMessage(result.message || 'Message vocal traité !', 'assistant');
-                    } else {
-                        addMessage('Erreur lors du traitement de l\'audio.', 'assistant');
-                    }
-                };
-                
-                reader.readAsDataURL(audioBlob);
-                
-            } catch (error) {
-                console.error('Erreur audio:', error);
-                hideTyping();
-                addMessage('Erreur lors de l\'envoi de l\'audio.', 'assistant');
-            }
-        }
-
-        // === FONCTIONS IMAGE ===
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                const preview = document.getElementById('imagePreview');
-                preview.innerHTML = `<img src="${reader.result}" style="max-width: 100%; height: auto; border-radius: 8px;">`;
-                preview.classList.remove('hidden');
-                
-                const base64Image = reader.result.split(',')[1];
-                await sendImageMessage(base64Image, file.name);
-            };
-            
-            reader.readAsDataURL(file);
-        }
-
-        async function sendImageMessage(base64Image, fileName) {
-            try {
-                showTyping();
-                
-                const response = await fetch(N8N_CONFIG.IMAGE_WEBHOOK || N8N_CONFIG.WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        image: base64Image,
-                        fileName: fileName,
-                        type: 'image',
-                        timestamp: new Date().toISOString()
-                    })
-                });
-                
-                const result = await response.json();
-                hideTyping();
-                
-                addMessage('📷 Image envoyée', 'user');
-                
-                if (result.success) {
-                    addMessage(result.message || 'Image traitée avec succès !', 'assistant');
-                } else {
-                    addMessage('Erreur lors du traitement de l\'image.', 'assistant');
-                }
-                
-                // Cacher la prévisualisation après envoi
-                setTimeout(() => {
-                    document.getElementById('imagePreview').classList.add('hidden');
-                }, 3000);
-                
-            } catch (error) {
-                console.error('Erreur image:', error);
-                hideTyping();
-                addMessage('Erreur lors de l\'envoi de l\'image.', 'assistant');
-            }
-        }
-
-        // === CHARGEMENT DES DONNÉES ===
-        async function loadInitialData() {
-            try {
-                updateConnectionStatus(true);
-                await Promise.all([
-                    loadPlanning(),
-                    loadHoursData()
-                ]);
-                updateLastUpdate();
-            } catch (error) {
-                console.error('Erreur chargement:', error);
-                updateConnectionStatus(false);
-            }
-        }
-
-        async function loadPlanning() {
-            try {
-                // Simuler des données de planning - remplacez par votre endpoint réel
-                const mockPlanning = [
-                    {
-                        day: 'Lundi',
-                        services: [
-                            { name: 'Midi', employees: ['Sarah (Cuisine)', 'Marc (Serveur)'] },
-                            { name: 'Soir', employees: ['Sarah (Cuisine)', 'Marc (Serveur)', 'Julie (Bar)'] }
-                        ]
-                    },
-                    {
-                        day: 'Mardi',
-                        services: [
-                            { name: 'Midi', employees: ['Louis (Cuisine)', 'Anna (Serveur)'] },
-                            { name: 'Soir', employees: ['Louis (Cuisine)', 'Anna (Serveur)', 'Paul (Bar)'] }
-                        ]
-                    }
-                ];
-                
-                displayPlanning(mockPlanning);
-                
-            } catch (error) {
-                console.error('Erreur planning:', error);
-                document.getElementById('planningGrid').innerHTML = 
-                    '<div class="day-card"><div class="day-header">Erreur de chargement</div></div>';
-            }
-        }
-
-        async function loadHoursData() {
-            try {
-                // Simuler des données d'heures - remplacez par votre endpoint réel
-                const mockHours = [
-                    { name: 'Sarah', role: 'Cuisine', status: 'present', todayHours: '8h', weekHours: '42h' },
-                    { name: 'Marc', role: 'Serveur', status: 'present', todayHours: '7h', weekHours: '38h' },
-                    { name: 'Julie', role: 'Bar', status: 'break', todayHours: '6h', weekHours: '35h' },
-                    { name: 'Louis', role: 'Cuisine', status: 'absent', todayHours: '0h', weekHours: '40h' }
-                ];
-                
-                displayHoursData(mockHours);
-                document.getElementById('activeEmployees').textContent = 
-                    mockHours.filter(emp => emp.status === 'present').length;
-                
-            } catch (error) {
-                console.error('Erreur heures:', error);
-                document.getElementById('hoursTableBody').innerHTML = 
-                    '<tr><td colspan="5">Erreur de chargement des données</td></tr>';
-            }
-        }
-
-        // === AFFICHAGE DES DONNÉES ===
-        function displayPlanning(planningData) {
-            const planningGrid = document.getElementById('planningGrid');
-            planningGrid.innerHTML = '';
-            
-            planningData.forEach(day => {
-                const dayCard = document.createElement('div');
-                dayCard.className = 'day-card';
-                
-                let servicesHtml = '';
-                day.services.forEach(service => {
-                    const employeesTags = service.employees.map(emp => 
-                        `<span class="employee-tag">${emp}</span>`
-                    ).join('');
-                    
-                    servicesHtml += `
-                        <div class="service">
-                            <h4>${service.name}</h4>
-                            <div class="employee-list">${employeesTags}</div>
+            // Affiche la liste de l'équipe
+            function displayTeam() {
+                teamListEl.innerHTML = '';
+                employees.forEach(emp => {
+                    const memberEl = document.createElement('div');
+                    memberEl.className = 'team-member';
+                    memberEl.innerHTML = `
+                        <div class="member-info">
+                            <div class="member-avatar" style="background-color: ${getColorForString(emp.nom)}">${emp.nom.substring(0, 2)}</div>
+                            <div class="member-details">
+                                <h4>${emp.nom}</h4>
+                                <p>${emp.role}</p>
+                            </div>
                         </div>
+                        <div class="status-dot ${emp.present ? 'present' : 'absent'}" title="${emp.present ? 'Présent' : 'Absent'}"></div>
                     `;
+                    teamListEl.appendChild(memberEl);
                 });
-                
-                dayCard.innerHTML = `
-                    <div class="day-header">${day.day}</div>
-                    ${servicesHtml}
-                `;
-                
-                planningGrid.appendChild(dayCard);
-            });
-        }
-
-        function displayHoursData(hoursData) {
-            const tbody = document.getElementById('hoursTableBody');
-            tbody.innerHTML = '';
-            
-            hoursData.forEach(employee => {
-                const row = document.createElement('tr');
-                const statusClass = `status-${employee.status}`;
-                const statusText = {
-                    'present': '🟢 Présent',
-                    'absent': '🔴 Absent',
-                    'break': '🟡 Pause'
-                }[employee.status];
-                
-                row.innerHTML = `
-                    <td>${employee.name}</td>
-                    <td>${employee.role}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${employee.todayHours}</td>
-                    <td>${employee.weekHours}</td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-        }
-
-        // === UTILITAIRES ===
-        function updateCurrentDate() {
-            const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
-            document.getElementById('currentDate').textContent = 
-                now.toLocaleDateString('fr-FR', options);
-        }
-
-        function updateLastUpdate() {
-            const now = new Date();
-            document.getElementById('lastUpdate').textContent = 
-                now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function updateConnectionStatus(isOnline) {
-            const statusElement = document.getElementById('connectionStatus');
-            if (isOnline) {
-                statusElement.textContent = '🟢 En ligne';
-                statusElement.className = 'connection-status connection-online';
-            } else {
-                statusElement.textContent = '🔴 Hors ligne';
-                statusElement.className = 'connection-status connection-offline';
             }
-        }
+
+            // Affiche le planning
+            function displayPlanning() {
+                planningListEl.innerHTML = '';
+                const groupedPlanning = planning.reduce((acc, p) => {
+                    acc[p.day] = acc[p.day] || [];
+                    acc[p.day].push(p);
+                    return acc;
+                }, {});
+
+                for (const day in groupedPlanning) {
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'planning-day';
+                    
+                    let servicesHTML = groupedPlanning[day].map(service => `
+                        <div class="service-badge ${service.service.toLowerCase()}">
+                            <span>${service.service}</span>
+                            <div class="team-preview">
+                                ${service.employes.map(e => `<div class="team-preview-avatar" style="background-color: ${getColorForString(e)}" title="${e}">${e.substring(0,1)}</div>`).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+
+                    dayEl.innerHTML = `
+                        <div class="day-header">${day}</div>
+                        <div class="services">${servicesHTML}</div>
+                    `;
+                    planningListEl.appendChild(dayEl);
+                }
+            }
+            
+            // Met à jour les statistiques
+            function updateStats() {
+                const totalHeures = employees.reduce((sum, emp) => sum + emp.heuresSemaine, 0);
+                const totalHeuresSupp = employees.reduce((sum, emp) => sum + Math.max(0, emp.heuresSemaine - emp.heuresContrat), 0);
+                const coutSalarial = employees.reduce((sum, emp) => {
+                    const heuresNormales = Math.min(emp.heuresSemaine, emp.heuresContrat);
+                    const heuresSupp = Math.max(0, emp.heuresSemaine - emp.heuresContrat);
+                    return sum + (heuresNormales * 15) + (heuresSupp * 15 * 1.25); // Simulation de coût
+                }, 0);
+                const presence = (employees.filter(e => e.present).length / employees.length) * 100;
+
+                document.getElementById('statTotalHeures').textContent = `${totalHeures}h`;
+                document.getElementById('statHeuresSupp').textContent = `${totalHeuresSupp}h`;
+                document.getElementById('statCout').textContent = `${Math.round(coutSalarial)}€`;
+                document.getElementById('statPresence').textContent = `${Math.round(presence)}%`;
+            }
+
+            // --- LOGIQUE DU CHAT ---
+            fabAI.addEventListener('click', () => chatModal.classList.add('active'));
+            closeChat.addEventListener('click', () => chatModal.classList.remove('active'));
+            chatModal.addEventListener('click', (e) => {
+                if (e.target === chatModal) {
+                    chatModal.classList.remove('active');
+                }
+            });
+            
+            const handleSendMessage = () => {
+                const messageText = chatInput.value.trim();
+                if (messageText === '') return;
+                
+                addMessageToChat(messageText, 'user');
+                chatInput.value = '';
+
+                // Simuler une réponse de l'IA
+                setTimeout(() => {
+                    addMessageToChat("Je traite votre demande...", 'bot');
+                }, 1000);
+            };
+
+            sendChatBtn.addEventListener('click', handleSendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSendMessage();
+            });
+
+            function addMessageToChat(text, sender) {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message ${sender}`;
+                messageEl.innerHTML = `<div class="message-bubble">${text}</div>`;
+                chatMessagesEl.appendChild(messageEl);
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+            }
+
+            // --- UTILITAIRES ---
+            function getColorForString(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+                return "#" + "00000".substring(0, 6 - c.length) + c;
+            }
+
+            // --- INITIALISATION ---
+            displayTeam();
+            displayPlanning();
+            updateStats();
+        });
     </script>
 </body>
 </html>

@@ -498,6 +498,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
+            // --- CONFIGURATION ---
+            const N8N_WEBHOOK_URL = 'https://morzinecap.app.n8n.cloud/webhook/23ed6cad-a469-446c-bccd-fe294d0f1839';
+
             // --- DONNÉES DE SIMULATION ---
             // Remplacez ceci par vos données réelles (ex: fetch depuis une API)
             const employees = [
@@ -612,17 +615,44 @@
                 }
             });
             
-            const handleSendMessage = () => {
+            const handleSendMessage = async () => {
                 const messageText = chatInput.value.trim();
                 if (messageText === '') return;
                 
                 addMessageToChat(messageText, 'user');
                 chatInput.value = '';
+                addTypingIndicator();
 
-                // Simuler une réponse de l'IA
-                setTimeout(() => {
-                    addMessageToChat("Je traite votre demande...", 'bot');
-                }, 1000);
+                try {
+                    const response = await fetch(N8N_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: messageText })
+                    });
+                    
+                    removeTypingIndicator();
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // L'image est retournée dans une propriété 'imageUrl'
+                    if (data.imageUrl) {
+                        addMessageToChat(`<img src="${data.imageUrl}" alt="Image générée" style="max-width:100%; border-radius: 12px;">`, 'bot');
+                    } else {
+                         // Adaptez la clé selon la réponse de votre webhook (ex: data.message, data.text)
+                        const botResponse = data.message || data.text || "J'ai bien reçu votre message.";
+                        addMessageToChat(botResponse, 'bot');
+                    }
+
+                } catch (error) {
+                    console.error('Erreur lors de la communication avec le webhook:', error);
+                    removeTypingIndicator();
+                    addMessageToChat("Désolé, une erreur est survenue. Veuillez réessayer.", 'bot');
+                }
             };
 
             sendChatBtn.addEventListener('click', handleSendMessage);
@@ -630,13 +660,30 @@
                 if (e.key === 'Enter') handleSendMessage();
             });
 
-            function addMessageToChat(text, sender) {
+            function addMessageToChat(html, sender) {
                 const messageEl = document.createElement('div');
                 messageEl.className = `message ${sender}`;
-                messageEl.innerHTML = `<div class="message-bubble">${text}</div>`;
+                messageEl.innerHTML = `<div class="message-bubble">${html}</div>`;
                 chatMessagesEl.appendChild(messageEl);
                 chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
             }
+
+            function addTypingIndicator() {
+                const indicator = document.createElement('div');
+                indicator.id = 'typing-indicator';
+                indicator.className = 'message bot';
+                indicator.innerHTML = `<div class="message-bubble">...</div>`;
+                chatMessagesEl.appendChild(indicator);
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+            }
+
+            function removeTypingIndicator() {
+                const indicator = document.getElementById('typing-indicator');
+                if(indicator) {
+                    indicator.remove();
+                }
+            }
+
 
             // --- UTILITAIRES ---
             function getColorForString(str) {
